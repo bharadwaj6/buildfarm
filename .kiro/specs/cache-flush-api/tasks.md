@@ -55,7 +55,7 @@
     - Write unit tests for in-memory adapter
     - _Requirements: 1.3, 1.4, 1.6_
 
-- [ ] 5. Implement CAS adapters
+- [x] 5. Implement CAS adapters
   - [x] 5.1 Create CASAdapter interface
     - Define the interface for CAS adapters
     - Write unit tests for the adapter contract
@@ -79,26 +79,26 @@
     - Write unit tests for Redis CAS worker map adapter
     - _Requirements: 2.4, 2.5, 2.7_
 
-- [ ] 6. Implement Cache Flush Service
-  - [ ] 6.1 Create CacheFlushService interface
+- [x] 6. Implement Cache Flush Service
+  - [x] 6.1 Create CacheFlushService interface
     - Define methods for flushing Action Cache and CAS
     - Write unit tests for the service contract
     - _Requirements: 1.1, 2.1_
 
-  - [ ] 6.2 Implement CacheFlushServiceImpl
+  - [x] 6.2 Implement CacheFlushServiceImpl
     - Implement coordination logic for flush operations
     - Add error handling and partial failure handling
     - Write unit tests for service implementation
     - _Requirements: 1.4, 1.5, 1.6, 2.5, 2.6, 2.7_
 
-- [ ] 7. Implement Admin API endpoints
-  - [ ] 7.1 Create REST endpoints for Action Cache flushing
+- [x] 7. Implement Admin API endpoints
+  - [x] 7.1 Create REST endpoints for Action Cache flushing
     - Implement POST /admin/v1/cache/action/flush endpoint
     - Add request validation and error handling
     - Write unit tests for the endpoint
     - _Requirements: 1.1, 1.5, 4.1, 4.3_
 
-  - [ ] 7.2 Create REST endpoints for CAS flushing
+  - [x] 7.2 Create REST endpoints for CAS flushing
     - Implement POST /admin/v1/cache/cas/flush endpoint
     - Add request validation and error handling
     - Write unit tests for the endpoint
