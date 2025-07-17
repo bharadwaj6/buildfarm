@@ -37,7 +37,7 @@
     - Write unit tests for configuration handling
     - _Requirements: 5.2_
 
-- [ ] 4. Implement Action Cache adapters
+- [x] 4. Implement Action Cache adapters
   - [x] 4.1 Create ActionCacheAdapter interface
     - Define the interface for Action Cache adapters
     - Write unit tests for the adapter contract
@@ -61,19 +61,19 @@
     - Write unit tests for the adapter contract
     - _Requirements: 2.1, 2.5_
 
-  - [ ] 5.2 Implement FilesystemCASAdapter
+  - [x] 5.2 Implement FilesystemCASAdapter
     - Implement flush functionality for filesystem-backed CAS
     - Add space reclamation tracking
     - Write unit tests for filesystem adapter
     - _Requirements: 2.2, 2.5, 2.7_
 
-  - [ ] 5.3 Implement InMemoryLRUCASAdapter
+  - [x] 5.3 Implement InMemoryLRUCASAdapter
     - Implement flush functionality for in-memory LRU cache
     - Add metrics collection for flush operations
     - Write unit tests for in-memory LRU adapter
     - _Requirements: 2.3, 2.5, 2.7_
 
-  - [ ] 5.4 Implement RedisCASWorkerMapAdapter
+  - [x] 5.4 Implement RedisCASWorkerMapAdapter
     - Implement flush functionality for Redis-backed CAS worker map
     - Add metrics collection for flush operations
     - Write unit tests for Redis CAS worker map adapter

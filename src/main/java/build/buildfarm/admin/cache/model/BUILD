@@ -6,6 +6,7 @@ java_library(
         "//src/main/java/build/buildfarm/common",
         "@maven//:com_google_guava_guava",
         "@maven//:com_google_protobuf_protobuf_java",
-        "@maven//:com_fasterxml_jackson_core_jackson_annotations",
+        # Temporarily comment out Jackson annotations due to visibility issues
+        # "@maven//:com_fasterxml_jackson_core_jackson_annotations",
     ],
 )

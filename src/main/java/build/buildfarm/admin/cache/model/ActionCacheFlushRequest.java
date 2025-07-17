@@ -1,7 +1,5 @@
 package build.buildfarm.admin.cache.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /**
  * Request to flush Action Cache entries.
  */
@@ -35,7 +33,6 @@ public class ActionCacheFlushRequest {
    *
    * @return the instance name
    */
-  @JsonProperty("instanceName")
   public String getInstanceName() {
     return instanceName;
   }
@@ -45,7 +42,6 @@ public class ActionCacheFlushRequest {
    *
    * @param instanceName the instance name
    */
-  @JsonProperty("instanceName")
   public void setInstanceName(String instanceName) {
     this.instanceName = instanceName;
   }
@@ -55,7 +51,6 @@ public class ActionCacheFlushRequest {
    *
    * @return the digest prefix
    */
-  @JsonProperty("digestPrefix")
   public String getDigestPrefix() {
     return digestPrefix;
   }
@@ -65,7 +60,6 @@ public class ActionCacheFlushRequest {
    *
    * @param digestPrefix the digest prefix
    */
-  @JsonProperty("digestPrefix")
   public void setDigestPrefix(String digestPrefix) {
     this.digestPrefix = digestPrefix;
   }
@@ -75,7 +69,6 @@ public class ActionCacheFlushRequest {
    *
    * @return true if Redis-backed entries should be flushed, false otherwise
    */
-  @JsonProperty("flushRedis")
   public boolean isFlushRedis() {
     return flushRedis;
   }
@@ -85,7 +78,6 @@ public class ActionCacheFlushRequest {
    *
    * @param flushRedis true if Redis-backed entries should be flushed, false otherwise
    */
-  @JsonProperty("flushRedis")
   public void setFlushRedis(boolean flushRedis) {
     this.flushRedis = flushRedis;
   }
@@ -95,7 +87,6 @@ public class ActionCacheFlushRequest {
    *
    * @return true if in-memory entries should be flushed, false otherwise
    */
-  @JsonProperty("flushInMemory")
   public boolean isFlushInMemory() {
     return flushInMemory;
   }
@@ -105,7 +96,6 @@ public class ActionCacheFlushRequest {
    *
    * @param flushInMemory true if in-memory entries should be flushed, false otherwise
    */
-  @JsonProperty("flushInMemory")
   public void setFlushInMemory(boolean flushInMemory) {
     this.flushInMemory = flushInMemory;
   }

@@ -1,7 +1,5 @@
 package build.buildfarm.admin.cache.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /**
  * Request to flush Content Addressable Storage entries.
  */
@@ -36,7 +34,6 @@ public class CASFlushRequest {
    *
    * @return the instance name
    */
-  @JsonProperty("instanceName")
   public String getInstanceName() {
     return instanceName;
   }
@@ -46,7 +43,6 @@ public class CASFlushRequest {
    *
    * @param instanceName the instance name
    */
-  @JsonProperty("instanceName")
   public void setInstanceName(String instanceName) {
     this.instanceName = instanceName;
   }
@@ -56,7 +52,6 @@ public class CASFlushRequest {
    *
    * @return the digest prefix
    */
-  @JsonProperty("digestPrefix")
   public String getDigestPrefix() {
     return digestPrefix;
   }
@@ -66,7 +61,6 @@ public class CASFlushRequest {
    *
    * @param digestPrefix the digest prefix
    */
-  @JsonProperty("digestPrefix")
   public void setDigestPrefix(String digestPrefix) {
     this.digestPrefix = digestPrefix;
   }
@@ -76,7 +70,6 @@ public class CASFlushRequest {
    *
    * @return true if filesystem-backed entries should be flushed, false otherwise
    */
-  @JsonProperty("flushFilesystem")
   public boolean isFlushFilesystem() {
     return flushFilesystem;
   }
@@ -86,7 +79,6 @@ public class CASFlushRequest {
    *
    * @param flushFilesystem true if filesystem-backed entries should be flushed, false otherwise
    */
-  @JsonProperty("flushFilesystem")
   public void setFlushFilesystem(boolean flushFilesystem) {
     this.flushFilesystem = flushFilesystem;
   }
@@ -96,7 +88,6 @@ public class CASFlushRequest {
    *
    * @return true if in-memory LRU cache entries should be flushed, false otherwise
    */
-  @JsonProperty("flushInMemoryLRU")
   public boolean isFlushInMemoryLRU() {
     return flushInMemoryLRU;
   }
@@ -106,7 +97,6 @@ public class CASFlushRequest {
    *
    * @param flushInMemoryLRU true if in-memory LRU cache entries should be flushed, false otherwise
    */
-  @JsonProperty("flushInMemoryLRU")
   public void setFlushInMemoryLRU(boolean flushInMemoryLRU) {
     this.flushInMemoryLRU = flushInMemoryLRU;
   }
@@ -116,7 +106,6 @@ public class CASFlushRequest {
    *
    * @return true if Redis-backed CAS worker map entries should be flushed, false otherwise
    */
-  @JsonProperty("flushRedisWorkerMap")
   public boolean isFlushRedisWorkerMap() {
     return flushRedisWorkerMap;
   }
@@ -126,7 +115,6 @@ public class CASFlushRequest {
    *
    * @param flushRedisWorkerMap true if Redis-backed CAS worker map entries should be flushed, false otherwise
    */
-  @JsonProperty("flushRedisWorkerMap")
   public void setFlushRedisWorkerMap(boolean flushRedisWorkerMap) {
     this.flushRedisWorkerMap = flushRedisWorkerMap;
   }
