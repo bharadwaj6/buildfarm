@@ -19,7 +19,7 @@
     - Write unit tests for internal models
     - _Requirements: 1.4, 2.5_
 
-- [ ] 3. Implement standalone Action Cache
+- [x] 3. Implement standalone Action Cache
   - [x] 3.1 Define ActionCache interface
     - Create interface with get, put, and flush methods
     - Write unit tests for the interface contract
@@ -31,7 +31,7 @@
     - Write unit tests for StandaloneActionCache
     - _Requirements: 5.1, 5.2, 5.3_
 
-  - [ ] 3.3 Implement configuration for standalone Action Cache
+  - [x] 3.3 Implement configuration for standalone Action Cache
     - Create configuration classes for the standalone Action Cache
     - Implement configuration loading and validation
     - Write unit tests for configuration handling

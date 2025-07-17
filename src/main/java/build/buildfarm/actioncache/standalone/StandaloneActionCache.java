@@ -2,6 +2,7 @@ package build.buildfarm.actioncache.standalone;
 
 import build.bazel.remote.execution.v2.ActionResult;
 import build.bazel.remote.execution.v2.Digest;
+import build.buildfarm.actioncache.standalone.config.ActionCacheConfig;
 import build.buildfarm.admin.cache.adapter.ac.ActionCacheAdapter;
 import build.buildfarm.admin.cache.model.FlushCriteria;
 import build.buildfarm.admin.cache.model.FlushResult;
@@ -9,6 +10,7 @@ import build.buildfarm.admin.cache.model.FlushScope;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.LinkedBlockingQueue;
 import javax.annotation.Nullable;
 
 /**
@@ -17,6 +19,8 @@ import javax.annotation.Nullable;
 public class StandaloneActionCache implements ActionCache {
   private final ConcurrentMap<Digest, ActionResult> inMemoryCache;
   private final List<ActionCacheAdapter> adapters;
+  private final int maxCacheSize;
+  private final LinkedBlockingQueue<Digest> evictionQueue;
 
   /**
    * Creates a new StandaloneActionCache instance.
@@ -24,19 +28,104 @@ public class StandaloneActionCache implements ActionCache {
    * @param adapters the list of adapters for different storage backends
    */
   public StandaloneActionCache(List<ActionCacheAdapter> adapters) {
+    this(adapters, 10000); // Default max cache size
+  }
+  
+  /**
+   * Creates a new StandaloneActionCache instance with the specified max cache size.
+   *
+   * @param adapters the list of adapters for different storage backends
+   * @param maxCacheSize the maximum size of the in-memory cache
+   */
+  public StandaloneActionCache(List<ActionCacheAdapter> adapters, int maxCacheSize) {
     this.inMemoryCache = new ConcurrentHashMap<>();
     this.adapters = adapters;
+    this.maxCacheSize = maxCacheSize;
+    this.evictionQueue = new LinkedBlockingQueue<>();
+  }
+  
+  /**
+   * Creates a new StandaloneActionCache instance from the given configuration.
+   *
+   * @param config the configuration
+   * @param adapters the list of adapters for different storage backends
+   */
+  public StandaloneActionCache(ActionCacheConfig config, List<ActionCacheAdapter> adapters) {
+    this.adapters = adapters;
+    this.maxCacheSize = config.getInMemoryCacheMaxSize();
+    
+    if (config.isEnableInMemoryCache()) {
+      this.inMemoryCache = new ConcurrentHashMap<>();
+      this.evictionQueue = new LinkedBlockingQueue<>();
+    } else {
+      this.inMemoryCache = null;
+      this.evictionQueue = null;
+    }
   }
 
   @Override
   @Nullable
   public ActionResult get(Digest actionKey) {
-    return inMemoryCache.get(actionKey);
+    if (inMemoryCache == null) {
+      // In-memory cache is disabled, delegate to adapters
+      for (ActionCacheAdapter adapter : adapters) {
+        ActionResult result = adapter.get(actionKey);
+        if (result != null) {
+          return result;
+        }
+      }
+      return null;
+    }
+    
+    // Check in-memory cache first
+    ActionResult result = inMemoryCache.get(actionKey);
+    if (result != null) {
+      return result;
+    }
+    
+    // If not found in memory, check adapters
+    for (ActionCacheAdapter adapter : adapters) {
+      result = adapter.get(actionKey);
+      if (result != null) {
+        // Cache the result in memory for future use
+        putInMemory(actionKey, result);
+        return result;
+      }
+    }
+    
+    return null;
   }
 
   @Override
   public void put(Digest actionKey, ActionResult actionResult) {
+    // Store in adapters
+    for (ActionCacheAdapter adapter : adapters) {
+      adapter.put(actionKey, actionResult);
+    }
+    
+    // Store in memory if enabled
+    if (inMemoryCache != null) {
+      putInMemory(actionKey, actionResult);
+    }
+  }
+  
+  /**
+   * Puts an action result into the in-memory cache, handling eviction if necessary.
+   *
+   * @param actionKey the action key
+   * @param actionResult the action result
+   */
+  private void putInMemory(Digest actionKey, ActionResult actionResult) {
+    if (inMemoryCache.size() >= maxCacheSize) {
+      // Evict the oldest entry
+      Digest toEvict = evictionQueue.poll();
+      if (toEvict != null) {
+        inMemoryCache.remove(toEvict);
+      }
+    }
+    
     inMemoryCache.put(actionKey, actionResult);
+    evictionQueue.offer(actionKey);
   }
 
   @Override
