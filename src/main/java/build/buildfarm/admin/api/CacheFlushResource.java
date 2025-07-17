@@ -1,5 +1,6 @@
 package build.buildfarm.admin.api;
 
+import build.buildfarm.admin.auth.AdminPrincipal;
 import build.buildfarm.admin.cache.service.CacheFlushService;
 import build.buildfarm.admin.cache.model.ActionCacheFlushRequest;
 import build.buildfarm.admin.cache.model.ActionCacheFlushResponse;
@@ -7,7 +8,9 @@ import build.buildfarm.admin.cache.model.CASFlushRequest;
 import build.buildfarm.admin.cache.model.CASFlushResponse;
 import build.buildfarm.admin.cache.model.FlushScope;
 import build.buildfarm.admin.cache.model.ErrorResponse;
+import build.buildfarm.admin.logging.FlushOperationLogger;
 import com.google.common.base.Strings;
+import java.security.Principal;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Inject;
@@ -15,8 +18,10 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
 
 /**
  * REST resource for cache flushing operations.
@@ -25,10 +30,12 @@ import javax.ws.rs.core.Response;
 public class CacheFlushResource {
   private static final Logger logger = Logger.getLogger(CacheFlushResource.class.getName());
   private final CacheFlushService cacheFlushService;
+  private final FlushOperationLogger flushLogger;
 
   @Inject
   public CacheFlushResource(CacheFlushService cacheFlushService) {
     this.cacheFlushService = cacheFlushService;
+    this.flushLogger = new FlushOperationLogger();
   }
 
   /**
@@ -41,7 +48,7 @@ public class CacheFlushResource {
   @Path("/action/flush")
   @Produces(MediaType.APPLICATION_JSON)
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response flushActionCache(ActionCacheFlushRequest request) {
+  public Response flushActionCache(ActionCacheFlushRequest request, @Context SecurityContext securityContext) {
     // Validate request
     Response validationResponse = validateActionCacheFlushRequest(request);
     if (validationResponse != null) {
@@ -49,11 +56,16 @@ public class CacheFlushResource {
     }
 
     try {
-      logger.info("Processing Action Cache flush request: scope=" + request.getScope() 
-          + ", flushRedis=" + request.isFlushRedis() 
-          + ", flushInMemory=" + request.isFlushInMemory());
+      // Get user identity from security context
+      String username = getUserIdentity(securityContext);
+      
+      // Log the flush request
+      logger.info("Action Cache flush requested by user '" + username + "'");
       
       ActionCacheFlushResponse response = cacheFlushService.flushActionCache(request);
+      
+      // Log detailed information about the flush operation
+      flushLogger.logActionCacheFlush(username, request, response);
       
       if (!response.isSuccess()) {
         logger.warning("Action Cache flush operation failed: " + response.getMessage());
@@ -66,13 +78,17 @@ public class CacheFlushResource {
           + response.getEntriesRemoved() + " entries removed");
       return Response.ok(response).build();
     } catch (IllegalArgumentException e) {
+      String username = getUserIdentity(securityContext);
       logger.log(Level.WARNING, "Invalid Action Cache flush request", e);
+      flushLogger.logFlushError(username, "Action Cache flush validation", e);
       ErrorResponse errorResponse = new ErrorResponse("INVALID_ARGUMENT", e.getMessage());
       return Response.status(Response.Status.BAD_REQUEST)
           .entity(errorResponse)
           .build();
     } catch (Exception e) {
+      String username = getUserIdentity(securityContext);
       logger.log(Level.SEVERE, "Error flushing Action Cache", e);
+      flushLogger.logFlushError(username, "Action Cache flush", e);
       ErrorResponse errorResponse = new ErrorResponse("INTERNAL_ERROR", 
           "Error flushing Action Cache: " + e.getMessage());
       return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
@@ -91,7 +107,7 @@ public class CacheFlushResource {
   @Path("/cas/flush")
   @Produces(MediaType.APPLICATION_JSON)
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response flushCAS(CASFlushRequest request) {
+  public Response flushCAS(CASFlushRequest request, @Context SecurityContext securityContext) {
     // Validate request
     Response validationResponse = validateCASFlushRequest(request);
     if (validationResponse != null) {
@@ -99,12 +115,16 @@ public class CacheFlushResource {
     }
 
     try {
-      logger.info("Processing CAS flush request: scope=" + request.getScope() 
-          + ", flushFilesystem=" + request.isFlushFilesystem() 
-          + ", flushInMemoryLRU=" + request.isFlushInMemoryLRU()
-          + ", flushRedisWorkerMap=" + request.isFlushRedisWorkerMap());
+      // Get user identity from security context
+      String username = getUserIdentity(securityContext);
+      
+      // Log the flush request
+      logger.info("CAS flush requested by user '" + username + "'");
       
       CASFlushResponse response = cacheFlushService.flushCAS(request);
+      
+      // Log detailed information about the flush operation
+      flushLogger.logCASFlush(username, request, response);
       
       if (!response.isSuccess()) {
         logger.warning("CAS flush operation failed: " + response.getMessage());
@@ -118,13 +138,17 @@ public class CacheFlushResource {
           + response.getBytesReclaimed() + " bytes reclaimed");
       return Response.ok(response).build();
     } catch (IllegalArgumentException e) {
+      String username = getUserIdentity(securityContext);
       logger.log(Level.WARNING, "Invalid CAS flush request", e);
+      flushLogger.logFlushError(username, "CAS flush validation", e);
       ErrorResponse errorResponse = new ErrorResponse("INVALID_ARGUMENT", e.getMessage());
       return Response.status(Response.Status.BAD_REQUEST)
           .entity(errorResponse)
           .build();
     } catch (Exception e) {
+      String username = getUserIdentity(securityContext);
       logger.log(Level.SEVERE, "Error flushing CAS", e);
+      flushLogger.logFlushError(username, "CAS flush", e);
       ErrorResponse errorResponse = new ErrorResponse("INTERNAL_ERROR", 
           "Error flushing CAS: " + e.getMessage());
       return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
@@ -234,4 +258,21 @@ public class CacheFlushResource {
     
     return null;
   }
+  
+  /**
+   * Gets the user identity from the security context.
+   *
+   * @param securityContext the security context
+   * @return the user identity
+   */
+  private String getUserIdentity(SecurityContext securityContext) {
+    if (securityContext == null || securityContext.getUserPrincipal() == null) {
+      return "unknown";
+    }
+    
+    Principal principal = securityContext.getUserPrincipal();
+    return principal.getName();
+  }
+  
+
 }

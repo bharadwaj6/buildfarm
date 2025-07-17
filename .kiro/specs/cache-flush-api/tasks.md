@@ -104,13 +104,13 @@
     - Write unit tests for the endpoint
     - _Requirements: 2.1, 2.6, 4.1, 4.3_
 
-- [ ] 8. Implement authentication and authorization
-  - [ ] 8.1 Integrate with existing authentication system
+- [x] 8. Implement authentication and authorization
+  - [x] 8.1 Integrate with existing authentication system
     - Add authentication checks to API endpoints
     - Write unit tests for authentication integration
     - _Requirements: 3.1, 3.2_
 
-  - [ ] 8.2 Implement logging for flush operations
+  - [x] 8.2 Implement logging for flush operations
     - Add detailed logging for all flush operations
     - Include user identity, timestamp, and operation details
     - Write unit tests for logging functionality
