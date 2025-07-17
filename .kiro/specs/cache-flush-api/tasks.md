@@ -5,27 +5,27 @@
   - Define interfaces and base classes
   - _Requirements: 4.1, 4.2_
 
-- [-] 2. Implement data models for the Cache Flush API
-  - [-] 2.1 Create request and response models
+- [x] 2. Implement data models for the Cache Flush API
+  - [x] 2.1 Create request and response models
     - Implement ActionCacheFlushRequest and CASFlushRequest classes
     - Implement ActionCacheFlushResponse and CASFlushResponse classes
     - Implement FlushScope enum
     - Write unit tests for request/response models
     - _Requirements: 1.1, 2.1, 4.3_
 
-  - [ ] 2.2 Create internal models for flush operations
+  - [x] 2.2 Create internal models for flush operations
     - Implement FlushCriteria class
     - Implement FlushResult class with merge capability
     - Write unit tests for internal models
     - _Requirements: 1.4, 2.5_
 
 - [ ] 3. Implement standalone Action Cache
-  - [ ] 3.1 Define ActionCache interface
+  - [x] 3.1 Define ActionCache interface
     - Create interface with get, put, and flush methods
     - Write unit tests for the interface contract
     - _Requirements: 5.1, 5.3_
 
-  - [ ] 3.2 Implement StandaloneActionCache class
+  - [x] 3.2 Implement StandaloneActionCache class
     - Implement core functionality (get, put methods)
     - Implement adapter pattern for different storage backends
     - Write unit tests for StandaloneActionCache
