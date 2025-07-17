@@ -4,7 +4,7 @@ import build.buildfarm.admin.cache.model.FlushCriteria;
 import build.buildfarm.admin.cache.model.FlushResult;
 
 /**
- * Interface for CAS adapters that can flush entries.
+ * Interface for Content Addressable Storage (CAS) adapters that can flush entries.
  */
 public interface CASAdapter {
   /**

@@ -38,25 +38,25 @@
     - _Requirements: 5.2_
 
 - [ ] 4. Implement Action Cache adapters
-  - [ ] 4.1 Create ActionCacheAdapter interface
+  - [x] 4.1 Create ActionCacheAdapter interface
     - Define the interface for Action Cache adapters
     - Write unit tests for the adapter contract
     - _Requirements: 1.1, 1.4_
 
-  - [ ] 4.2 Implement RedisActionCacheAdapter
+  - [x] 4.2 Implement RedisActionCacheAdapter
     - Implement flush functionality for Redis-backed Action Cache
     - Add metrics collection for flush operations
     - Write unit tests for Redis adapter
     - _Requirements: 1.2, 1.4, 1.6_
 
-  - [ ] 4.3 Implement InMemoryActionCacheAdapter
+  - [x] 4.3 Implement InMemoryActionCacheAdapter
     - Implement flush functionality for in-memory Action Cache
     - Add metrics collection for flush operations
     - Write unit tests for in-memory adapter
     - _Requirements: 1.3, 1.4, 1.6_
 
 - [ ] 5. Implement CAS adapters
-  - [ ] 5.1 Create CASAdapter interface
+  - [x] 5.1 Create CASAdapter interface
     - Define the interface for CAS adapters
     - Write unit tests for the adapter contract
     - _Requirements: 2.1, 2.5_
