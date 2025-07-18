@@ -1,0 +1,462 @@
+openapi: 3.0.3
+info:
+  title: BuildFarm Cache Flush API
+  description: |
+    API for flushing BuildFarm Action Cache (AC) and Content Addressable Storage (CAS) entries.
+    This API allows administrators to selectively or completely flush parts of the caches to remove stale or corrupted entries and reclaim disk space.
+  version: 1.0.0
+  contact:
+    name: BuildFarm Team
+servers:
+  - url: http://localhost:8080
+    description: Local BuildFarm server
+tags:
+  - name: Cache Flush
+    description: Operations for flushing BuildFarm caches
+paths:
+  /admin/v1/cache/action/flush:
+    post:
+      tags:
+        - Cache Flush
+      summary: Flush Action Cache entries
+      description: |
+        Flushes Action Cache entries based on specified criteria. This operation can be scoped to all entries,
+        entries for a specific instance, or entries with a specific digest prefix. The operation can target
+        Redis-backed entries, in-memory entries, or both.
+      operationId: flushActionCache
+      security:
+        - AdminAuth: []
+      requestBody:
+        description: Flush request parameters
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActionCacheFlushRequest'
+            examples:
+              flushAll:
+                summary: Flush all Action Cache entries
+                value:
+                  scope: ALL
+                  flushRedis: true
+                  flushInMemory: true
+              flushInstance:
+                summary: Flush entries for a specific instance
+                value:
+                  scope: INSTANCE
+                  instanceName: default_instance
+                  flushRedis: true
+                  flushInMemory: false
+              flushDigestPrefix:
+                summary: Flush entries with a specific digest prefix
+                value:
+                  scope: DIGEST_PREFIX
+                  digestPrefix: "abc123"
+                  flushRedis: false
+                  flushInMemory: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActionCacheFlushResponse'
+              example:
+                success: true
+                message: "Action Cache flush completed successfully"
+                entriesRemoved: 150
+                entriesRemovedByBackend:
+                  redis: 100
+                  in-memory: 50
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                errorCode: "INVALID_ARGUMENT"
+                message: "Instance name must be specified when scope is INSTANCE"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                errorCode: "UNAUTHORIZED"
+                message: "Authentication required"
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                errorCode: "PERMISSION_DENIED"
+                message: "User does not have administrator privileges"
+        '429':
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RateLimitExceededResponse'
+              example:
+                message: "Rate limit exceeded for Action Cache flush operations"
+                operationsPerformed: 5
+                maxOperationsPerWindow: 5
+                windowSizeMs: 60000
+                timeRemainingMs: 30000
+        '503':
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConcurrencyLimitExceededResponse'
+              example:
+                message: "Concurrency limit reached for Action Cache flush operations"
+                currentOperations: 5
+                maxConcurrentOperations: 5
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                errorCode: "INTERNAL_ERROR"
+                message: "Error flushing Action Cache: Redis connection failed"
+
+  /admin/v1/cache/cas/flush:
+    post:
+      tags:
+        - Cache Flush
+      summary: Flush Content Addressable Storage entries
+      description: |
+        Flushes Content Addressable Storage entries based on specified criteria. This operation can be scoped to all entries,
+        entries for a specific instance, or entries with a specific digest prefix. The operation can target
+        filesystem-backed entries, in-memory LRU cache entries, Redis-backed CAS worker map entries, or any combination of these.
+      operationId: flushCAS
+      security:
+        - AdminAuth: []
+      requestBody:
+        description: Flush request parameters
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CASFlushRequest'
+            examples:
+              flushAll:
+                summary: Flush all CAS entries
+                value:
+                  scope: ALL
+                  flushFilesystem: true
+                  flushInMemoryLRU: true
+                  flushRedisWorkerMap: true
+              flushInstance:
+                summary: Flush entries for a specific instance
+                value:
+                  scope: INSTANCE
+                  instanceName: default_instance
+                  flushFilesystem: true
+                  flushInMemoryLRU: false
+                  flushRedisWorkerMap: false
+              flushDigestPrefix:
+                summary: Flush entries with a specific digest prefix
+                value:
+                  scope: DIGEST_PREFIX
+                  digestPrefix: "abc123"
+                  flushFilesystem: false
+                  flushInMemoryLRU: true
+                  flushRedisWorkerMap: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CASFlushResponse'
+              example:
+                success: true
+                message: "CAS flush completed successfully"
+                entriesRemoved: 250
+                bytesReclaimed: 1073741824
+                entriesRemovedByBackend:
+                  filesystem: 100
+                  in-memory-lru: 100
+                  redis-worker-map: 50
+                bytesReclaimedByBackend:
+                  filesystem: 1073741824
+                  in-memory-lru: 0
+                  redis-worker-map: 0
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                errorCode: "INVALID_ARGUMENT"
+                message: "Digest prefix must be specified when scope is DIGEST_PREFIX"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                errorCode: "UNAUTHORIZED"
+                message: "Authentication required"
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                errorCode: "PERMISSION_DENIED"
+                message: "User does not have administrator privileges"
+        '429':
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RateLimitExceededResponse'
+              example:
+                message: "Rate limit exceeded for CAS flush operations"
+                operationsPerformed: 5
+                maxOperationsPerWindow: 5
+                windowSizeMs: 60000
+                timeRemainingMs: 30000
+        '503':
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConcurrencyLimitExceededResponse'
+              example:
+                message: "Concurrency limit reached for CAS flush operations"
+                currentOperations: 3
+                maxConcurrentOperations: 3
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                errorCode: "INTERNAL_ERROR"
+                message: "Error flushing CAS: Filesystem operation failed"
+
+components:
+  securitySchemes:
+    AdminAuth:
+      type: http
+      scheme: basic
+      description: Basic authentication for administrators
+
+  schemas:
+    FlushScope:
+      type: string
+      description: Defines the scope of a cache flush operation
+      enum:
+        - ALL
+        - INSTANCE
+        - DIGEST_PREFIX
+      example: ALL
+
+    ActionCacheFlushRequest:
+      type: object
+      description: Request to flush Action Cache entries
+      required:
+        - scope
+      properties:
+        scope:
+          $ref: '#/components/schemas/FlushScope'
+        instanceName:
+          type: string
+          description: Instance name (required when scope is INSTANCE)
+          example: default_instance
+        digestPrefix:
+          type: string
+          description: Digest prefix (required when scope is DIGEST_PREFIX)
+          example: abc123
+        flushRedis:
+          type: boolean
+          description: Whether to flush Redis-backed entries
+          default: false
+          example: true
+        flushInMemory:
+          type: boolean
+          description: Whether to flush in-memory entries
+          default: false
+          example: true
+
+    ActionCacheFlushResponse:
+      type: object
+      description: Response from an Action Cache flush operation
+      properties:
+        success:
+          type: boolean
+          description: Whether the operation was successful
+          example: true
+        message:
+          type: string
+          description: Message describing the result of the operation
+          example: "Action Cache flush completed successfully"
+        entriesRemoved:
+          type: integer
+          format: int32
+          description: Total number of entries removed
+          example: 150
+        entriesRemovedByBackend:
+          type: object
+          description: Number of entries removed by backend
+          additionalProperties:
+            type: integer
+            format: int32
+          example:
+            redis: 100
+            in-memory: 50
+
+    CASFlushRequest:
+      type: object
+      description: Request to flush Content Addressable Storage entries
+      required:
+        - scope
+      properties:
+        scope:
+          $ref: '#/components/schemas/FlushScope'
+        instanceName:
+          type: string
+          description: Instance name (required when scope is INSTANCE)
+          example: default_instance
+        digestPrefix:
+          type: string
+          description: Digest prefix (required when scope is DIGEST_PREFIX)
+          example: abc123
+        flushFilesystem:
+          type: boolean
+          description: Whether to flush filesystem-backed entries
+          default: false
+          example: true
+        flushInMemoryLRU:
+          type: boolean
+          description: Whether to flush in-memory LRU cache entries
+          default: false
+          example: true
+        flushRedisWorkerMap:
+          type: boolean
+          description: Whether to flush Redis-backed CAS worker map entries
+          default: false
+          example: true
+
+    CASFlushResponse:
+      type: object
+      description: Response from a CAS flush operation
+      properties:
+        success:
+          type: boolean
+          description: Whether the operation was successful
+          example: true
+        message:
+          type: string
+          description: Message describing the result of the operation
+          example: "CAS flush completed successfully"
+        entriesRemoved:
+          type: integer
+          format: int32
+          description: Total number of entries removed
+          example: 250
+        bytesReclaimed:
+          type: integer
+          format: int64
+          description: Total number of bytes reclaimed
+          example: 1073741824
+        entriesRemovedByBackend:
+          type: object
+          description: Number of entries removed by backend
+          additionalProperties:
+            type: integer
+            format: int32
+          example:
+            filesystem: 100
+            in-memory-lru: 100
+            redis-worker-map: 50
+        bytesReclaimedByBackend:
+          type: object
+          description: Number of bytes reclaimed by backend
+          additionalProperties:
+            type: integer
+            format: int64
+          example:
+            filesystem: 1073741824
+            in-memory-lru: 0
+            redis-worker-map: 0
+
+    ErrorResponse:
+      type: object
+      description: Error response
+      properties:
+        errorCode:
+          type: string
+          description: Error code
+          example: "INVALID_ARGUMENT"
+        message:
+          type: string
+          description: Error message
+          example: "Instance name must be specified when scope is INSTANCE"
+        details:
+          type: object
+          description: Additional error details
+          additionalProperties:
+            type: string
+
+    RateLimitExceededResponse:
+      type: object
+      description: Response when rate limit is exceeded
+      properties:
+        message:
+          type: string
+          description: Error message
+          example: "Rate limit exceeded for Action Cache flush operations"
+        operationsPerformed:
+          type: integer
+          format: int32
+          description: Number of operations performed in the current window
+          example: 5
+        maxOperationsPerWindow:
+          type: integer
+          format: int32
+          description: Maximum number of operations allowed per window
+          example: 5
+        windowSizeMs:
+          type: integer
+          format: int64
+          description: Window size in milliseconds
+          example: 60000
+        timeRemainingMs:
+          type: integer
+          format: int64
+          description: Time remaining in the current window in milliseconds
+          example: 30000
+
+    ConcurrencyLimitExceededResponse:
+      type: object
+      description: Response when concurrency limit is exceeded
+      properties:
+        message:
+          type: string
+          description: Error message
+          example: "Concurrency limit reached for Action Cache flush operations"
+        currentOperations:
+          type: integer
+          format: int32
+          description: Current number of operations
+          example: 5
+        maxConcurrentOperations:
+          type: integer
+          format: int32
+          description: Maximum number of concurrent operations allowed
+          example: 5

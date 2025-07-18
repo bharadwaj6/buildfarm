@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BuildFarm Cache Flush</title>
+    <link rel="stylesheet" href="../css/cache-flush.css">
+</head>
+<body>
+    <div class="container">
+        <h1>BuildFarm Cache Flush</h1>
+        
+        <div class="tabs">
+            <button class="tab-button active" data-tab="action-cache">Action Cache</button>
+            <button class="tab-button" data-tab="cas">Content Addressable Storage</button>
+        </div>
+        
+        <div class="tab-content active" id="action-cache-tab">
+            <h2>Action Cache Flush</h2>
+            <form id="action-cache-form">
+                <div class="form-group">
+                    <label for="ac-scope">Scope:</label>
+                    <select id="ac-scope" name="scope" required>
+                        <option value="ALL">All</option>
+                        <option value="INSTANCE">Instance</option>
+                        <option value="DIGEST_PREFIX">Digest Prefix</option>
+                    </select>
+                </div>
+                
+                <div class="form-group hidden" id="ac-instance-group">
+                    <label for="ac-instance">Instance Name:</label>
+                    <input type="text" id="ac-instance" name="instanceName" placeholder="Enter instance name">
+                </div>
+                
+                <div class="form-group hidden" id="ac-digest-group">
+                    <label for="ac-digest">Digest Prefix:</label>
+                    <input type="text" id="ac-digest" name="digestPrefix" placeholder="Enter digest prefix">
+                </div>
+                
+                <div class="form-group">
+                    <label>Backends to Flush:</label>
+                    <div class="checkbox-group">
+                        <label>
+                            <input type="checkbox" id="ac-redis" name="flushRedis" checked>
+                            Redis
+                        </label>
+                        <label>
+                            <input type="checkbox" id="ac-memory" name="flushInMemory" checked>
+                            In-Memory
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">Flush Action Cache</button>
+                </div>
+            </form>
+            
+            <div id="ac-result" class="result-container hidden">
+                <h3>Result</h3>
+                <div class="result-content"></div>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="cas-tab">
+            <h2>Content Addressable Storage Flush</h2>
+            <form id="cas-form">
+                <div class="form-group">
+                    <label for="cas-scope">Scope:</label>
+                    <select id="cas-scope" name="scope" required>
+                        <option value="ALL">All</option>
+                        <option value="INSTANCE">Instance</option>
+                        <option value="DIGEST_PREFIX">Digest Prefix</option>
+                    </select>
+                </div>
+                
+                <div class="form-group hidden" id="cas-instance-group">
+                    <label for="cas-instance">Instance Name:</label>
+                    <input type="text" id="cas-instance" name="instanceName" placeholder="Enter instance name">
+                </div>
+                
+                <div class="form-group hidden" id="cas-digest-group">
+                    <label for="cas-digest">Digest Prefix:</label>
+                    <input type="text" id="cas-digest" name="digestPrefix" placeholder="Enter digest prefix">
+                </div>
+                
+                <div class="form-group">
+                    <label>Backends to Flush:</label>
+                    <div class="checkbox-group">
+                        <label>
+                            <input type="checkbox" id="cas-filesystem" name="flushFilesystem" checked>
+                            Filesystem
+                        </label>
+                        <label>
+                            <input type="checkbox" id="cas-memory" name="flushInMemoryLRU" checked>
+                            In-Memory LRU
+                        </label>
+                        <label>
+                            <input type="checkbox" id="cas-redis" name="flushRedisWorkerMap" checked>
+                            Redis Worker Map
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">Flush CAS</button>
+                </div>
+            </form>
+            
+            <div id="cas-result" class="result-container hidden">
+                <h3>Result</h3>
+                <div class="result-content"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="../js/cache-flush.js"></script>
+</body>
+</html>

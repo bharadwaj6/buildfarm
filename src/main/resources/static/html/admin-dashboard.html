@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BuildFarm Admin Dashboard</title>
+    <link rel="stylesheet" href="../css/admin-dashboard.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <header class="dashboard-header">
+            <h1>BuildFarm Admin Dashboard</h1>
+        </header>
+        
+        <nav class="dashboard-nav">
+            <ul>
+                <li><a href="#" class="active" data-section="overview">Overview</a></li>
+                <li><a href="#" data-section="cache-management">Cache Management</a></li>
+                <li><a href="#" data-section="system-status">System Status</a></li>
+                <li><a href="#" data-section="settings">Settings</a></li>
+            </ul>
+        </nav>
+        
+        <main class="dashboard-content">
+            <section id="overview" class="dashboard-section active">
+                <h2>Overview</h2>
+                <div class="dashboard-cards">
+                    <div class="dashboard-card">
+                        <h3>Action Cache</h3>
+                        <div class="card-content">
+                            <p>Status: <span class="status-indicator active">Active</span></p>
+                            <p>Entries: <span id="ac-entries">--</span></p>
+                            <p>Hit Rate: <span id="ac-hit-rate">--</span></p>
+                        </div>
+                        <div class="card-actions">
+                            <a href="/admin/ui/cache-flush#action-cache" class="btn">Manage Cache</a>
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-card">
+                        <h3>Content Addressable Storage</h3>
+                        <div class="card-content">
+                            <p>Status: <span class="status-indicator active">Active</span></p>
+                            <p>Entries: <span id="cas-entries">--</span></p>
+                            <p>Storage Used: <span id="cas-storage">--</span></p>
+                        </div>
+                        <div class="card-actions">
+                            <a href="/admin/ui/cache-flush#cas" class="btn">Manage Cache</a>
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-card">
+                        <h3>System Resources</h3>
+                        <div class="card-content">
+                            <p>CPU Usage: <span id="cpu-usage">--</span></p>
+                            <p>Memory Usage: <span id="memory-usage">--</span></p>
+                            <p>Disk Usage: <span id="disk-usage">--</span></p>
+                        </div>
+                        <div class="card-actions">
+                            <a href="#system-status" class="btn">View Details</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="dashboard-row">
+                    <div class="dashboard-panel">
+                        <h3>Recent Activity</h3>
+                        <div class="activity-list">
+                            <div class="activity-item">
+                                <span class="activity-time">10:45 AM</span>
+                                <span class="activity-description">Cache flush operation completed</span>
+                            </div>
+                            <div class="activity-item">
+                                <span class="activity-time">09:30 AM</span>
+                                <span class="activity-description">System backup completed</span>
+                            </div>
+                            <div class="activity-item">
+                                <span class="activity-time">08:15 AM</span>
+                                <span class="activity-description">Worker node added to cluster</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="cache-management" class="dashboard-section">
+                <h2>Cache Management</h2>
+                <div class="dashboard-row">
+                    <div class="dashboard-panel full-width">
+                        <h3>Cache Operations</h3>
+                        <div class="cache-operations">
+                            <div class="operation-card">
+                                <h4>Action Cache</h4>
+                                <p>Manage the Action Cache entries and perform maintenance operations.</p>
+                                <a href="/admin/ui/cache-flush#action-cache" class="btn">Flush Action Cache</a>
+                            </div>
+                            
+                            <div class="operation-card">
+                                <h4>Content Addressable Storage</h4>
+                                <p>Manage the Content Addressable Storage and reclaim disk space.</p>
+                                <a href="/admin/ui/cache-flush#cas" class="btn">Flush CAS</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="dashboard-row">
+                    <div class="dashboard-panel full-width">
+                        <h3>Cache Statistics</h3>
+                        <div class="stats-container">
+                            <div class="stats-card">
+                                <h4>Action Cache</h4>
+                                <ul>
+                                    <li>Total Entries: <span id="ac-total-entries">--</span></li>
+                                    <li>Hit Rate: <span id="ac-stats-hit-rate">--</span></li>
+                                    <li>Miss Rate: <span id="ac-stats-miss-rate">--</span></li>
+                                    <li>Average Entry Size: <span id="ac-avg-size">--</span></li>
+                                </ul>
+                            </div>
+                            
+                            <div class="stats-card">
+                                <h4>Content Addressable Storage</h4>
+                                <ul>
+                                    <li>Total Entries: <span id="cas-total-entries">--</span></li>
+                                    <li>Total Storage: <span id="cas-total-storage">--</span></li>
+                                    <li>Average Entry Size: <span id="cas-avg-size">--</span></li>
+                                    <li>Storage Utilization: <span id="cas-utilization">--</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="system-status" class="dashboard-section">
+                <h2>System Status</h2>
+                <p>System status information will be displayed here.</p>
+            </section>
+            
+            <section id="settings" class="dashboard-section">
+                <h2>Settings</h2>
+                <p>System settings will be displayed here.</p>
+            </section>
+        </main>
+    </div>
+    
+    <script src="../js/admin-dashboard.js"></script>
+</body>
+</html>
