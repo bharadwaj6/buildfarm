@@ -81,27 +81,11 @@ public class ConcurrencyControlServiceTest {
     assertTrue(concurrencyControlService.acquireActionCacheFlushPermit());
     assertTrue(concurrencyControlService.acquireActionCacheFlushPermit());
 
-    // Create a thread to try to acquire another permit
-    ExecutorService executor = Executors.newSingleThreadExecutor();
-    AtomicInteger result = new AtomicInteger(-1);
-    CountDownLatch latch = new CountDownLatch(1);
-
-    executor.submit(
-        () -> {
-          // Try to acquire a permit with a short timeout
-          ConcurrencyConfig config = new ConcurrencyConfig(3, 2, 100, true);
-          ConcurrencyControlService service = new ConcurrencyControlService(config);
-          boolean acquired = service.acquireActionCacheFlushPermit();
-          result.set(acquired ? 1 : 0);
-          latch.countDown();
-        });
-
-    // Wait for the thread to complete
-    latch.await(500, TimeUnit.MILLISECONDS);
-    executor.shutdown();
-
-    // The thread should not have acquired a permit
-    assertEquals(0, result.get());
+    // Try to acquire another permit - should fail
+    boolean acquired = concurrencyControlService.acquireActionCacheFlushPermit();
+    
+    // Should not be able to acquire another permit
+    assertEquals(false, acquired);
   }
 
   @Test
@@ -110,27 +94,11 @@ public class ConcurrencyControlServiceTest {
     assertTrue(concurrencyControlService.acquireCASFlushPermit());
     assertTrue(concurrencyControlService.acquireCASFlushPermit());
 
-    // Create a thread to try to acquire another permit
-    ExecutorService executor = Executors.newSingleThreadExecutor();
-    AtomicInteger result = new AtomicInteger(-1);
-    CountDownLatch latch = new CountDownLatch(1);
-
-    executor.submit(
-        () -> {
-          // Try to acquire a permit with a short timeout
-          ConcurrencyConfig config = new ConcurrencyConfig(3, 2, 100, true);
-          ConcurrencyControlService service = new ConcurrencyControlService(config);
-          boolean acquired = service.acquireCASFlushPermit();
-          result.set(acquired ? 1 : 0);
-          latch.countDown();
-        });
-
-    // Wait for the thread to complete
-    latch.await(500, TimeUnit.MILLISECONDS);
-    executor.shutdown();
-
-    // The thread should not have acquired a permit
-    assertEquals(0, result.get());
+    // Try to acquire another permit - should fail
+    boolean acquired = concurrencyControlService.acquireCASFlushPermit();
+    
+    // Should not be able to acquire another permit
+    assertEquals(false, acquired);
   }
 
   @Test

@@ -1,13 +1,5 @@
-java_library(
+alias(
     name = "ac",
-    srcs = glob(["*.java"]),
+    actual = "//src/main/java/build/buildfarm/admin/cache/adapter/impl",
     visibility = ["//visibility:public"],
-    deps = [
-        "//src/main/java/build/buildfarm/actioncache/standalone",
-        "//src/main/java/build/buildfarm/admin/cache/model",
-        "//src/main/java/build/buildfarm/common",
-        "@maven//:com_google_guava_guava",
-        "@maven//:com_google_protobuf_protobuf_java",
-        "@maven//:javax_inject_javax_inject",
-    ],
 )

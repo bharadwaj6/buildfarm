@@ -1,13 +1,14 @@
 java_library(
-    name = "service",
+    name = "impl",
     srcs = glob(["*.java"]),
     visibility = ["//visibility:public"],
     deps = [
-        "//src/main/java/build/buildfarm/admin/cache/adapter/cas",
         "//src/main/java/build/buildfarm/admin/cache/adapter/common",
-        "//src/main/java/build/buildfarm/admin/cache/concurrency",
-        "//src/main/java/build/buildfarm/admin/cache/metrics",
         "//src/main/java/build/buildfarm/admin/cache/model",
+        "//src/main/java/build/buildfarm/common",
         "@maven//:com_google_guava_guava",
+        "@maven//:com_google_protobuf_protobuf_java",
+        "@maven//:redis_clients_jedis",
+        "@remoteapis//build/bazel/remote/execution/v2:remote_execution_java_proto",
     ],
 )

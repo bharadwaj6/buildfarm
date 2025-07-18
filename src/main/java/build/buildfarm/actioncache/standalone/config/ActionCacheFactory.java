@@ -2,7 +2,9 @@ package build.buildfarm.actioncache.standalone.config;
 
 import build.buildfarm.actioncache.standalone.ActionCache;
 import build.buildfarm.actioncache.standalone.StandaloneActionCache;
-import build.buildfarm.admin.cache.adapter.ac.ActionCacheAdapter;
+import build.buildfarm.admin.cache.adapter.common.ActionCacheAdapter;
+import build.buildfarm.admin.cache.adapter.impl.InMemoryActionCacheAdapter;
+import build.buildfarm.admin.cache.adapter.impl.RedisActionCacheAdapter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

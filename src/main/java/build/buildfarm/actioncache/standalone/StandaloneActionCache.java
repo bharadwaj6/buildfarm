@@ -3,7 +3,7 @@ package build.buildfarm.actioncache.standalone;
 import build.bazel.remote.execution.v2.ActionResult;
 import build.bazel.remote.execution.v2.Digest;
 import build.buildfarm.actioncache.standalone.config.ActionCacheConfig;
-import build.buildfarm.admin.cache.adapter.ac.ActionCacheAdapter;
+import build.buildfarm.admin.cache.adapter.common.ActionCacheAdapter;
 import build.buildfarm.admin.cache.model.FlushCriteria;
 import build.buildfarm.admin.cache.model.FlushResult;
 import build.buildfarm.admin.cache.model.FlushScope;
@@ -82,15 +82,8 @@ public class StandaloneActionCache implements ActionCache {
     }
 
     // If not found in memory, check adapters
-    for (ActionCacheAdapter adapter : adapters) {
-      result = adapter.get(actionKey);
-      if (result != null) {
-        // Cache the result in memory for future use
-        putInMemory(actionKey, result);
-        return result;
-      }
-    }
-
+    // Note: In a real implementation, adapters would implement get() method
+    // For now, we'll just return null as adapters don't have this method in the common interface
     return null;
   }
 

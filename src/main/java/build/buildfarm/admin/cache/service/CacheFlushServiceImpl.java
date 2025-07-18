@@ -1,6 +1,6 @@
 package build.buildfarm.admin.cache.service;
 
-import build.buildfarm.admin.cache.adapter.ac.ActionCacheAdapter;
+import build.buildfarm.admin.cache.adapter.common.ActionCacheAdapter;
 import build.buildfarm.admin.cache.adapter.cas.CASAdapter;
 import build.buildfarm.admin.cache.concurrency.ConcurrencyConfig;
 import build.buildfarm.admin.cache.concurrency.ConcurrencyControlService;
@@ -74,8 +74,11 @@ public class CacheFlushServiceImpl implements CacheFlushService {
     if (!concurrencyControlService.acquireActionCacheFlushPermit()) {
       // Could not acquire permit, return error response
       logger.warning("Could not acquire Action Cache flush permit: concurrency limit reached");
-      return new ActionCacheFlushResponse(
-          false, "Concurrency limit reached for Action Cache flush operations", 0);
+      ActionCacheFlushResponse response = new ActionCacheFlushResponse();
+      response.setSuccess(false);
+      response.setMessage("Concurrency limit reached for Action Cache flush operations");
+      response.setEntriesRemoved(0);
+      return response;
     }
 
     ActionCacheFlushResponse response = new ActionCacheFlushResponse();
@@ -133,8 +136,12 @@ public class CacheFlushServiceImpl implements CacheFlushService {
     if (!concurrencyControlService.acquireCASFlushPermit()) {
       // Could not acquire permit, return error response
       logger.warning("Could not acquire CAS flush permit: concurrency limit reached");
-      return new CASFlushResponse(
-          false, "Concurrency limit reached for CAS flush operations", 0, 0);
+      CASFlushResponse response = new CASFlushResponse();
+      response.setSuccess(false);
+      response.setMessage("Concurrency limit reached for CAS flush operations");
+      response.setEntriesRemoved(0);
+      response.setBytesReclaimed(0);
+      return response;
     }
 
     CASFlushResponse response = new CASFlushResponse();
