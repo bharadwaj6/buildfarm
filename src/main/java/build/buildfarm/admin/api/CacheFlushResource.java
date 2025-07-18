@@ -6,8 +6,12 @@ import build.buildfarm.admin.cache.model.ActionCacheFlushRequest;
 import build.buildfarm.admin.cache.model.ActionCacheFlushResponse;
 import build.buildfarm.admin.cache.model.CASFlushRequest;
 import build.buildfarm.admin.cache.model.CASFlushResponse;
+import build.buildfarm.admin.cache.model.ConcurrencyLimitExceededResponse;
 import build.buildfarm.admin.cache.model.FlushScope;
 import build.buildfarm.admin.cache.model.ErrorResponse;
+import build.buildfarm.admin.cache.model.RateLimitExceededResponse;
+import build.buildfarm.admin.cache.ratelimit.RateLimitConfig;
+import build.buildfarm.admin.cache.ratelimit.RateLimitService;
 import build.buildfarm.admin.logging.FlushOperationLogger;
 import com.google.common.base.Strings;
 import java.security.Principal;
@@ -31,11 +35,23 @@ public class CacheFlushResource {
   private static final Logger logger = Logger.getLogger(CacheFlushResource.class.getName());
   private final CacheFlushService cacheFlushService;
   private final FlushOperationLogger flushLogger;
+  private final RateLimitService rateLimitService;
 
   @Inject
   public CacheFlushResource(CacheFlushService cacheFlushService) {
+    this(cacheFlushService, new RateLimitService(RateLimitConfig.getDefault()));
+  }
+  
+  /**
+   * Creates a new CacheFlushResource with the specified services.
+   *
+   * @param cacheFlushService the cache flush service
+   * @param rateLimitService the rate limit service
+   */
+  public CacheFlushResource(CacheFlushService cacheFlushService, RateLimitService rateLimitService) {
     this.cacheFlushService = cacheFlushService;
     this.flushLogger = new FlushOperationLogger();
+    this.rateLimitService = rateLimitService;
   }
 
   /**
@@ -59,6 +75,29 @@ public class CacheFlushResource {
       // Get user identity from security context
       String username = getUserIdentity(securityContext);
       
+      // Check rate limit
+      if (!rateLimitService.allowOperation(username, "action-cache-flush")) {
+        // Rate limit exceeded
+        RateLimitConfig config = rateLimitService.getConfig();
+        int operationsPerformed = rateLimitService.getOperationCount(username, "action-cache-flush");
+        long timeRemaining = rateLimitService.getTimeRemainingInWindow(username, "action-cache-flush");
+        
+        logger.warning(String.format(
+            "Rate limit exceeded for user '%s' on Action Cache flush: %d operations in %d ms window",
+            username, operationsPerformed, config.getWindowSizeMs()));
+        
+        RateLimitExceededResponse errorResponse = new RateLimitExceededResponse(
+            "Rate limit exceeded for Action Cache flush operations",
+            operationsPerformed,
+            config.getMaxOperationsPerWindow(),
+            config.getWindowSizeMs(),
+            timeRemaining);
+        
+        return Response.status(429) // 429 Too Many Requests
+            .entity(errorResponse)
+            .build();
+      }
+      
       // Log the flush request
       logger.info("Action Cache flush requested by user '" + username + "'");
       
@@ -68,6 +107,23 @@ public class CacheFlushResource {
       flushLogger.logActionCacheFlush(username, request, response);
       
       if (!response.isSuccess()) {
+        // Check if this is a concurrency limit exceeded error
+        if (response.getMessage() != null && 
+            response.getMessage().contains("Concurrency limit reached")) {
+          logger.warning("Action Cache flush concurrency limit reached: " + response.getMessage());
+          
+          // Create a concurrency limit exceeded response
+          ConcurrencyLimitExceededResponse errorResponse = new ConcurrencyLimitExceededResponse(
+              response.getMessage(),
+              5, // Using default value from ConcurrencyConfig
+              5  // Using default value from ConcurrencyConfig
+          );
+          
+          return Response.status(503) // 503 Service Unavailable
+              .entity(errorResponse)
+              .build();
+        }
+        
         logger.warning("Action Cache flush operation failed: " + response.getMessage());
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
             .entity(response)
@@ -118,6 +174,29 @@ public class CacheFlushResource {
       // Get user identity from security context
       String username = getUserIdentity(securityContext);
       
+      // Check rate limit
+      if (!rateLimitService.allowOperation(username, "cas-flush")) {
+        // Rate limit exceeded
+        RateLimitConfig config = rateLimitService.getConfig();
+        int operationsPerformed = rateLimitService.getOperationCount(username, "cas-flush");
+        long timeRemaining = rateLimitService.getTimeRemainingInWindow(username, "cas-flush");
+        
+        logger.warning(String.format(
+            "Rate limit exceeded for user '%s' on CAS flush: %d operations in %d ms window",
+            username, operationsPerformed, config.getWindowSizeMs()));
+        
+        RateLimitExceededResponse errorResponse = new RateLimitExceededResponse(
+            "Rate limit exceeded for CAS flush operations",
+            operationsPerformed,
+            config.getMaxOperationsPerWindow(),
+            config.getWindowSizeMs(),
+            timeRemaining);
+        
+        return Response.status(429) // 429 Too Many Requests
+            .entity(errorResponse)
+            .build();
+      }
+      
       // Log the flush request
       logger.info("CAS flush requested by user '" + username + "'");
       
@@ -127,6 +206,23 @@ public class CacheFlushResource {
       flushLogger.logCASFlush(username, request, response);
       
       if (!response.isSuccess()) {
+        // Check if this is a concurrency limit exceeded error
+        if (response.getMessage() != null && 
+            response.getMessage().contains("Concurrency limit reached")) {
+          logger.warning("CAS flush concurrency limit reached: " + response.getMessage());
+          
+          // Create a concurrency limit exceeded response
+          ConcurrencyLimitExceededResponse errorResponse = new ConcurrencyLimitExceededResponse(
+              response.getMessage(),
+              3, // Using default value from ConcurrencyConfig
+              3  // Using default value from ConcurrencyConfig
+          );
+          
+          return Response.status(503) // 503 Service Unavailable
+              .entity(errorResponse)
+              .build();
+        }
+        
         logger.warning("CAS flush operation failed: " + response.getMessage());
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
             .entity(response)

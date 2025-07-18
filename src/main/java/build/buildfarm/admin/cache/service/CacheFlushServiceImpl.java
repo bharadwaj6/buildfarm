@@ -2,16 +2,20 @@ package build.buildfarm.admin.cache.service;
 
 import build.buildfarm.admin.cache.adapter.ac.ActionCacheAdapter;
 import build.buildfarm.admin.cache.adapter.cas.CASAdapter;
+import build.buildfarm.admin.cache.concurrency.ConcurrencyConfig;
+import build.buildfarm.admin.cache.concurrency.ConcurrencyControlService;
 import build.buildfarm.admin.cache.model.ActionCacheFlushRequest;
 import build.buildfarm.admin.cache.model.ActionCacheFlushResponse;
 import build.buildfarm.admin.cache.model.CASFlushRequest;
 import build.buildfarm.admin.cache.model.CASFlushResponse;
+import build.buildfarm.admin.cache.model.ConcurrencyLimitExceededResponse;
 import build.buildfarm.admin.cache.model.FlushCriteria;
 import build.buildfarm.admin.cache.model.FlushResult;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
@@ -29,6 +33,7 @@ public class CacheFlushServiceImpl implements CacheFlushService {
   private final ReadWriteLock actionCacheLock = new ReentrantReadWriteLock();
   private final ReadWriteLock casLock = new ReentrantReadWriteLock();
   private final Map<String, Integer> activeFlushOperations = new ConcurrentHashMap<>();
+  private final ConcurrencyControlService concurrencyControlService;
   
   /**
    * Creates a new CacheFlushServiceImpl instance.
@@ -39,15 +44,41 @@ public class CacheFlushServiceImpl implements CacheFlushService {
   public CacheFlushServiceImpl(
       Map<String, ActionCacheAdapter> actionCacheAdapters,
       Map<String, CASAdapter> casAdapters) {
+    this(actionCacheAdapters, casAdapters, new ConcurrencyControlService(ConcurrencyConfig.getDefault()));
+  }
+  
+  /**
+   * Creates a new CacheFlushServiceImpl instance with the specified concurrency control service.
+   *
+   * @param actionCacheAdapters map of Action Cache adapters by name
+   * @param casAdapters map of CAS adapters by name
+   * @param concurrencyControlService the concurrency control service
+   */
+  public CacheFlushServiceImpl(
+      Map<String, ActionCacheAdapter> actionCacheAdapters,
+      Map<String, CASAdapter> casAdapters,
+      ConcurrencyControlService concurrencyControlService) {
     this.actionCacheAdapters = ImmutableMap.copyOf(
         Preconditions.checkNotNull(actionCacheAdapters, "actionCacheAdapters"));
     this.casAdapters = ImmutableMap.copyOf(
         Preconditions.checkNotNull(casAdapters, "casAdapters"));
+    this.concurrencyControlService = Preconditions.checkNotNull(
+        concurrencyControlService, "concurrencyControlService");
   }
   
   @Override
   public ActionCacheFlushResponse flushActionCache(ActionCacheFlushRequest request) {
     validateActionCacheFlushRequest(request);
+    
+    // Try to acquire a permit for the Action Cache flush operation
+    if (!concurrencyControlService.acquireActionCacheFlushPermit()) {
+      // Could not acquire permit, return error response
+      logger.warning("Could not acquire Action Cache flush permit: concurrency limit reached");
+      return new ActionCacheFlushResponse(
+          false, 
+          "Concurrency limit reached for Action Cache flush operations", 
+          0);
+    }
     
     ActionCacheFlushResponse response = new ActionCacheFlushResponse();
     FlushCriteria criteria = new FlushCriteria(
@@ -86,6 +117,8 @@ public class CacheFlushServiceImpl implements CacheFlushService {
       } finally {
         // Decrement the active flush operation count
         decrementActiveFlushOperations("action-cache");
+        // Release the permit
+        concurrencyControlService.releaseActionCacheFlushPermit();
       }
     } finally {
       actionCacheLock.readLock().unlock();
@@ -97,6 +130,17 @@ public class CacheFlushServiceImpl implements CacheFlushService {
   @Override
   public CASFlushResponse flushCAS(CASFlushRequest request) {
     validateCASFlushRequest(request);
+    
+    // Try to acquire a permit for the CAS flush operation
+    if (!concurrencyControlService.acquireCASFlushPermit()) {
+      // Could not acquire permit, return error response
+      logger.warning("Could not acquire CAS flush permit: concurrency limit reached");
+      return new CASFlushResponse(
+          false, 
+          "Concurrency limit reached for CAS flush operations", 
+          0, 
+          0);
+    }
     
     CASFlushResponse response = new CASFlushResponse();
     FlushCriteria criteria = new FlushCriteria(
@@ -145,6 +189,8 @@ public class CacheFlushServiceImpl implements CacheFlushService {
       } finally {
         // Decrement the active flush operation count
         decrementActiveFlushOperations("cas");
+        // Release the permit
+        concurrencyControlService.releaseCASFlushPermit();
       }
     } finally {
       casLock.readLock().unlock();
