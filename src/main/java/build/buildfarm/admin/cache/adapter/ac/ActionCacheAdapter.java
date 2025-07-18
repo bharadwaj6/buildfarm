@@ -3,9 +3,7 @@ package build.buildfarm.admin.cache.adapter.ac;
 import build.buildfarm.admin.cache.model.FlushCriteria;
 import build.buildfarm.admin.cache.model.FlushResult;
 
-/**
- * Interface for Action Cache adapters that can flush entries.
- */
+/** Interface for Action Cache adapters that can flush entries. */
 public interface ActionCacheAdapter {
   /**
    * Flushes Action Cache entries based on the specified criteria.

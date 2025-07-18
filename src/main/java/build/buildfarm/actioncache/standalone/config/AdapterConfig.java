@@ -4,13 +4,11 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nullable;
 
-/**
- * Configuration for an Action Cache adapter.
- */
+/** Configuration for an Action Cache adapter. */
 public class AdapterConfig {
   private AdapterType type;
   private Map<String, String> properties = new HashMap<>();
-  
+
   /**
    * Returns the adapter type.
    *
@@ -19,7 +17,7 @@ public class AdapterConfig {
   public AdapterType getType() {
     return type;
   }
-  
+
   /**
    * Sets the adapter type.
    *
@@ -28,7 +26,7 @@ public class AdapterConfig {
   public void setType(AdapterType type) {
     this.type = type;
   }
-  
+
   /**
    * Returns the adapter properties.
    *
@@ -37,7 +35,7 @@ public class AdapterConfig {
   public Map<String, String> getProperties() {
     return properties;
   }
-  
+
   /**
    * Sets the adapter properties.
    *
@@ -46,7 +44,7 @@ public class AdapterConfig {
   public void setProperties(Map<String, String> properties) {
     this.properties = properties;
   }
-  
+
   /**
    * Validates the adapter configuration.
    *
@@ -57,7 +55,7 @@ public class AdapterConfig {
     if (type == null) {
       return "Adapter type must be specified";
     }
-    
+
     switch (type) {
       case REDIS:
         return validateRedisConfig();
@@ -69,7 +67,7 @@ public class AdapterConfig {
         return "Unknown adapter type: " + type;
     }
   }
-  
+
   private String validateRedisConfig() {
     if (!properties.containsKey("host")) {
       return "Redis adapter requires 'host' property";
@@ -84,12 +82,12 @@ public class AdapterConfig {
     }
     return null;
   }
-  
+
   private String validateInMemoryConfig() {
     // No specific validation for in-memory adapter
     return null;
   }
-  
+
   private String validateFileSystemConfig() {
     if (!properties.containsKey("path")) {
       return "File system adapter requires 'path' property";

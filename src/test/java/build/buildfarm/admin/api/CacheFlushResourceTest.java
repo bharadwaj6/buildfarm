@@ -24,9 +24,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Tests for {@link CacheFlushResource}.
- */
+/** Tests for {@link CacheFlushResource}. */
 @RunWith(JUnit4.class)
 public class CacheFlushResourceTest {
   private CacheFlushService mockCacheFlushService;
@@ -44,20 +42,20 @@ public class CacheFlushResourceTest {
     ActionCacheFlushRequest request = new ActionCacheFlushRequest();
     request.setScope(FlushScope.ALL);
     request.setFlushRedis(true);
-    
+
     ActionCacheFlushResponse expectedResponse = new ActionCacheFlushResponse();
     expectedResponse.setSuccess(true);
     expectedResponse.setEntriesRemoved(10);
     Map<String, Integer> entriesRemovedByBackend = new HashMap<>();
     entriesRemovedByBackend.put("redis", 10);
     expectedResponse.setEntriesRemovedByBackend(entriesRemovedByBackend);
-    
+
     when(mockCacheFlushService.flushActionCache(any(ActionCacheFlushRequest.class)))
         .thenReturn(expectedResponse);
-    
+
     // Act
     Response response = cacheFlushResource.flushActionCache(request);
-    
+
     // Assert
     assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
     ActionCacheFlushResponse actualResponse = (ActionCacheFlushResponse) response.getEntity();
@@ -68,12 +66,12 @@ public class CacheFlushResourceTest {
         expectedResponse.getEntriesRemovedByBackend(), actualResponse.getEntriesRemovedByBackend());
     verify(mockCacheFlushService).flushActionCache(request);
   }
-  
+
   @Test
   public void flushActionCache_nullRequest_returnsBadRequest() {
     // Act
     Response response = cacheFlushResource.flushActionCache(null);
-    
+
     // Assert
     assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
     ErrorResponse errorResponse = (ErrorResponse) response.getEntity();
@@ -82,17 +80,17 @@ public class CacheFlushResourceTest {
     assertEquals("Request cannot be null", errorResponse.getMessage());
     verify(mockCacheFlushService, never()).flushActionCache(any());
   }
-  
+
   @Test
   public void flushActionCache_nullScope_returnsBadRequest() {
     // Arrange
     ActionCacheFlushRequest request = new ActionCacheFlushRequest();
     request.setScope(null);
     request.setFlushRedis(true);
-    
+
     // Act
     Response response = cacheFlushResource.flushActionCache(request);
-    
+
     // Assert
     assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
     ErrorResponse errorResponse = (ErrorResponse) response.getEntity();
@@ -101,7 +99,7 @@ public class CacheFlushResourceTest {
     assertEquals("Scope must be specified", errorResponse.getMessage());
     verify(mockCacheFlushService, never()).flushActionCache(any());
   }
-  
+
   @Test
   public void flushActionCache_instanceScopeWithoutInstanceName_returnsBadRequest() {
     // Arrange
@@ -109,19 +107,20 @@ public class CacheFlushResourceTest {
     request.setScope(FlushScope.INSTANCE);
     request.setInstanceName(null);
     request.setFlushRedis(true);
-    
+
     // Act
     Response response = cacheFlushResource.flushActionCache(request);
-    
+
     // Assert
     assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
     ErrorResponse errorResponse = (ErrorResponse) response.getEntity();
     assertNotNull(errorResponse);
     assertEquals("INVALID_ARGUMENT", errorResponse.getErrorCode());
-    assertEquals("Instance name must be specified when scope is INSTANCE", errorResponse.getMessage());
+    assertEquals(
+        "Instance name must be specified when scope is INSTANCE", errorResponse.getMessage());
     verify(mockCacheFlushService, never()).flushActionCache(any());
   }
-  
+
   @Test
   public void flushActionCache_digestPrefixScopeWithoutDigestPrefix_returnsBadRequest() {
     // Arrange
@@ -129,19 +128,20 @@ public class CacheFlushResourceTest {
     request.setScope(FlushScope.DIGEST_PREFIX);
     request.setDigestPrefix(null);
     request.setFlushRedis(true);
-    
+
     // Act
     Response response = cacheFlushResource.flushActionCache(request);
-    
+
     // Assert
     assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
     ErrorResponse errorResponse = (ErrorResponse) response.getEntity();
     assertNotNull(errorResponse);
     assertEquals("INVALID_ARGUMENT", errorResponse.getErrorCode());
-    assertEquals("Digest prefix must be specified when scope is DIGEST_PREFIX", errorResponse.getMessage());
+    assertEquals(
+        "Digest prefix must be specified when scope is DIGEST_PREFIX", errorResponse.getMessage());
     verify(mockCacheFlushService, never()).flushActionCache(any());
   }
-  
+
   @Test
   public void flushActionCache_noBackendsSelected_returnsBadRequest() {
     // Arrange
@@ -149,10 +149,10 @@ public class CacheFlushResourceTest {
     request.setScope(FlushScope.ALL);
     request.setFlushRedis(false);
     request.setFlushInMemory(false);
-    
+
     // Act
     Response response = cacheFlushResource.flushActionCache(request);
-    
+
     // Assert
     assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
     ErrorResponse errorResponse = (ErrorResponse) response.getEntity();
@@ -161,20 +161,20 @@ public class CacheFlushResourceTest {
     assertEquals("At least one backend must be selected for flushing", errorResponse.getMessage());
     verify(mockCacheFlushService, never()).flushActionCache(any());
   }
-  
+
   @Test
   public void flushActionCache_serviceThrowsException_returnsInternalServerError() {
     // Arrange
     ActionCacheFlushRequest request = new ActionCacheFlushRequest();
     request.setScope(FlushScope.ALL);
     request.setFlushRedis(true);
-    
+
     when(mockCacheFlushService.flushActionCache(any(ActionCacheFlushRequest.class)))
         .thenThrow(new RuntimeException("Test exception"));
-    
+
     // Act
     Response response = cacheFlushResource.flushActionCache(request);
-    
+
     // Assert
     assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
     ErrorResponse errorResponse = (ErrorResponse) response.getEntity();
@@ -183,24 +183,24 @@ public class CacheFlushResourceTest {
     assertTrue(errorResponse.getMessage().contains("Test exception"));
     verify(mockCacheFlushService).flushActionCache(request);
   }
-  
+
   @Test
   public void flushActionCache_serviceReturnsFailure_returnsInternalServerError() {
     // Arrange
     ActionCacheFlushRequest request = new ActionCacheFlushRequest();
     request.setScope(FlushScope.ALL);
     request.setFlushRedis(true);
-    
+
     ActionCacheFlushResponse failureResponse = new ActionCacheFlushResponse();
     failureResponse.setSuccess(false);
     failureResponse.setMessage("Failed to flush Action Cache");
-    
+
     when(mockCacheFlushService.flushActionCache(any(ActionCacheFlushRequest.class)))
         .thenReturn(failureResponse);
-    
+
     // Act
     Response response = cacheFlushResource.flushActionCache(request);
-    
+
     // Assert
     assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
     ActionCacheFlushResponse actualResponse = (ActionCacheFlushResponse) response.getEntity();
@@ -209,14 +209,14 @@ public class CacheFlushResourceTest {
     assertEquals(failureResponse.getMessage(), actualResponse.getMessage());
     verify(mockCacheFlushService).flushActionCache(request);
   }
-  
+
   @Test
   public void flushCAS_validRequest_returnsOk() {
     // Arrange
     CASFlushRequest request = new CASFlushRequest();
     request.setScope(FlushScope.ALL);
     request.setFlushFilesystem(true);
-    
+
     CASFlushResponse expectedResponse = new CASFlushResponse();
     expectedResponse.setSuccess(true);
     expectedResponse.setEntriesRemoved(10);
@@ -227,13 +227,12 @@ public class CacheFlushResourceTest {
     Map<String, Long> bytesReclaimedByBackend = new HashMap<>();
     bytesReclaimedByBackend.put("filesystem", 1024L);
     expectedResponse.setBytesReclaimedByBackend(bytesReclaimedByBackend);
-    
-    when(mockCacheFlushService.flushCAS(any(CASFlushRequest.class)))
-        .thenReturn(expectedResponse);
-    
+
+    when(mockCacheFlushService.flushCAS(any(CASFlushRequest.class))).thenReturn(expectedResponse);
+
     // Act
     Response response = cacheFlushResource.flushCAS(request);
-    
+
     // Assert
     assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
     CASFlushResponse actualResponse = (CASFlushResponse) response.getEntity();
@@ -247,12 +246,12 @@ public class CacheFlushResourceTest {
         expectedResponse.getBytesReclaimedByBackend(), actualResponse.getBytesReclaimedByBackend());
     verify(mockCacheFlushService).flushCAS(request);
   }
-  
+
   @Test
   public void flushCAS_nullRequest_returnsBadRequest() {
     // Act
     Response response = cacheFlushResource.flushCAS(null);
-    
+
     // Assert
     assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
     ErrorResponse errorResponse = (ErrorResponse) response.getEntity();
@@ -261,17 +260,17 @@ public class CacheFlushResourceTest {
     assertEquals("Request cannot be null", errorResponse.getMessage());
     verify(mockCacheFlushService, never()).flushCAS(any());
   }
-  
+
   @Test
   public void flushCAS_nullScope_returnsBadRequest() {
     // Arrange
     CASFlushRequest request = new CASFlushRequest();
     request.setScope(null);
     request.setFlushFilesystem(true);
-    
+
     // Act
     Response response = cacheFlushResource.flushCAS(request);
-    
+
     // Assert
     assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
     ErrorResponse errorResponse = (ErrorResponse) response.getEntity();
@@ -280,7 +279,7 @@ public class CacheFlushResourceTest {
     assertEquals("Scope must be specified", errorResponse.getMessage());
     verify(mockCacheFlushService, never()).flushCAS(any());
   }
-  
+
   @Test
   public void flushCAS_instanceScopeWithoutInstanceName_returnsBadRequest() {
     // Arrange
@@ -288,19 +287,20 @@ public class CacheFlushResourceTest {
     request.setScope(FlushScope.INSTANCE);
     request.setInstanceName(null);
     request.setFlushFilesystem(true);
-    
+
     // Act
     Response response = cacheFlushResource.flushCAS(request);
-    
+
     // Assert
     assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
     ErrorResponse errorResponse = (ErrorResponse) response.getEntity();
     assertNotNull(errorResponse);
     assertEquals("INVALID_ARGUMENT", errorResponse.getErrorCode());
-    assertEquals("Instance name must be specified when scope is INSTANCE", errorResponse.getMessage());
+    assertEquals(
+        "Instance name must be specified when scope is INSTANCE", errorResponse.getMessage());
     verify(mockCacheFlushService, never()).flushCAS(any());
   }
-  
+
   @Test
   public void flushCAS_digestPrefixScopeWithoutDigestPrefix_returnsBadRequest() {
     // Arrange
@@ -308,19 +308,20 @@ public class CacheFlushResourceTest {
     request.setScope(FlushScope.DIGEST_PREFIX);
     request.setDigestPrefix(null);
     request.setFlushFilesystem(true);
-    
+
     // Act
     Response response = cacheFlushResource.flushCAS(request);
-    
+
     // Assert
     assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
     ErrorResponse errorResponse = (ErrorResponse) response.getEntity();
     assertNotNull(errorResponse);
     assertEquals("INVALID_ARGUMENT", errorResponse.getErrorCode());
-    assertEquals("Digest prefix must be specified when scope is DIGEST_PREFIX", errorResponse.getMessage());
+    assertEquals(
+        "Digest prefix must be specified when scope is DIGEST_PREFIX", errorResponse.getMessage());
     verify(mockCacheFlushService, never()).flushCAS(any());
   }
-  
+
   @Test
   public void flushCAS_noBackendsSelected_returnsBadRequest() {
     // Arrange
@@ -329,10 +330,10 @@ public class CacheFlushResourceTest {
     request.setFlushFilesystem(false);
     request.setFlushInMemoryLRU(false);
     request.setFlushRedisWorkerMap(false);
-    
+
     // Act
     Response response = cacheFlushResource.flushCAS(request);
-    
+
     // Assert
     assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
     ErrorResponse errorResponse = (ErrorResponse) response.getEntity();
@@ -341,20 +342,20 @@ public class CacheFlushResourceTest {
     assertEquals("At least one backend must be selected for flushing", errorResponse.getMessage());
     verify(mockCacheFlushService, never()).flushCAS(any());
   }
-  
+
   @Test
   public void flushCAS_serviceThrowsException_returnsInternalServerError() {
     // Arrange
     CASFlushRequest request = new CASFlushRequest();
     request.setScope(FlushScope.ALL);
     request.setFlushFilesystem(true);
-    
+
     when(mockCacheFlushService.flushCAS(any(CASFlushRequest.class)))
         .thenThrow(new RuntimeException("Test exception"));
-    
+
     // Act
     Response response = cacheFlushResource.flushCAS(request);
-    
+
     // Assert
     assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
     ErrorResponse errorResponse = (ErrorResponse) response.getEntity();
@@ -363,24 +364,23 @@ public class CacheFlushResourceTest {
     assertTrue(errorResponse.getMessage().contains("Test exception"));
     verify(mockCacheFlushService).flushCAS(request);
   }
-  
+
   @Test
   public void flushCAS_serviceReturnsFailure_returnsInternalServerError() {
     // Arrange
     CASFlushRequest request = new CASFlushRequest();
     request.setScope(FlushScope.ALL);
     request.setFlushFilesystem(true);
-    
+
     CASFlushResponse failureResponse = new CASFlushResponse();
     failureResponse.setSuccess(false);
     failureResponse.setMessage("Failed to flush CAS");
-    
-    when(mockCacheFlushService.flushCAS(any(CASFlushRequest.class)))
-        .thenReturn(failureResponse);
-    
+
+    when(mockCacheFlushService.flushCAS(any(CASFlushRequest.class))).thenReturn(failureResponse);
+
     // Act
     Response response = cacheFlushResource.flushCAS(request);
-    
+
     // Assert
     assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
     CASFlushResponse actualResponse = (CASFlushResponse) response.getEntity();

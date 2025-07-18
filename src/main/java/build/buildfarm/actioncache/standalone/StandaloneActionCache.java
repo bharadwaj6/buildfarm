@@ -13,9 +13,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import javax.annotation.Nullable;
 
-/**
- * A standalone implementation of the Action Cache that supports multiple storage backends.
- */
+/** A standalone implementation of the Action Cache that supports multiple storage backends. */
 public class StandaloneActionCache implements ActionCache {
   private final ConcurrentMap<Digest, ActionResult> inMemoryCache;
   private final List<ActionCacheAdapter> adapters;
@@ -30,7 +28,7 @@ public class StandaloneActionCache implements ActionCache {
   public StandaloneActionCache(List<ActionCacheAdapter> adapters) {
     this(adapters, 10000); // Default max cache size
   }
-  
+
   /**
    * Creates a new StandaloneActionCache instance with the specified max cache size.
    *
@@ -43,7 +41,7 @@ public class StandaloneActionCache implements ActionCache {
     this.maxCacheSize = maxCacheSize;
     this.evictionQueue = new LinkedBlockingQueue<>();
   }
-  
+
   /**
    * Creates a new StandaloneActionCache instance from the given configuration.
    *
@@ -53,7 +51,7 @@ public class StandaloneActionCache implements ActionCache {
   public StandaloneActionCache(ActionCacheConfig config, List<ActionCacheAdapter> adapters) {
     this.adapters = adapters;
     this.maxCacheSize = config.getInMemoryCacheMaxSize();
-    
+
     if (config.isEnableInMemoryCache()) {
       this.inMemoryCache = new ConcurrentHashMap<>();
       this.evictionQueue = new LinkedBlockingQueue<>();
@@ -76,13 +74,13 @@ public class StandaloneActionCache implements ActionCache {
       }
       return null;
     }
-    
+
     // Check in-memory cache first
     ActionResult result = inMemoryCache.get(actionKey);
     if (result != null) {
       return result;
     }
-    
+
     // If not found in memory, check adapters
     for (ActionCacheAdapter adapter : adapters) {
       result = adapter.get(actionKey);
@@ -92,7 +90,7 @@ public class StandaloneActionCache implements ActionCache {
         return result;
       }
     }
-    
+
     return null;
   }
 
@@ -102,13 +100,13 @@ public class StandaloneActionCache implements ActionCache {
     for (ActionCacheAdapter adapter : adapters) {
       adapter.put(actionKey, actionResult);
     }
-    
+
     // Store in memory if enabled
     if (inMemoryCache != null) {
       putInMemory(actionKey, actionResult);
     }
   }
-  
+
   /**
    * Puts an action result into the in-memory cache, handling eviction if necessary.
    *
@@ -123,7 +121,7 @@ public class StandaloneActionCache implements ActionCache {
         inMemoryCache.remove(toEvict);
       }
     }
-    
+
     inMemoryCache.put(actionKey, actionResult);
     evictionQueue.offer(actionKey);
   }
@@ -131,10 +129,10 @@ public class StandaloneActionCache implements ActionCache {
   @Override
   public FlushResult flush(FlushCriteria criteria) {
     FlushResult result = new FlushResult();
-    
+
     // First, flush in-memory cache
     int entriesRemoved = 0;
-    
+
     if (criteria.getScope() == FlushScope.ALL) {
       entriesRemoved = inMemoryCache.size();
       inMemoryCache.clear();
@@ -147,15 +145,15 @@ public class StandaloneActionCache implements ActionCache {
       // Count removed entries
       // In a real implementation, we would track the number of entries removed
     }
-    
+
     result.setEntriesRemoved(entriesRemoved);
-    
+
     // Then, flush all adapters
     for (ActionCacheAdapter adapter : adapters) {
       FlushResult adapterResult = adapter.flushEntries(criteria);
       result.merge(adapterResult);
     }
-    
+
     return result;
   }
 }

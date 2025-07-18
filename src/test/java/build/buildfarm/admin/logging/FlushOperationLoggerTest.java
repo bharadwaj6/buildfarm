@@ -20,9 +20,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Tests for {@link FlushOperationLogger}.
- */
+/** Tests for {@link FlushOperationLogger}. */
 @RunWith(JUnit4.class)
 public class FlushOperationLoggerTest {
   private FlushOperationLogger logger;
@@ -33,7 +31,7 @@ public class FlushOperationLoggerTest {
   public void setUp() {
     logger = new FlushOperationLogger();
     logHandler = new TestLogHandler();
-    
+
     // Get the underlying logger used by FlushOperationLogger and add our test handler
     underlyingLogger = Logger.getLogger(FlushOperationLogger.class.getName());
     underlyingLogger.addHandler(logHandler);
@@ -53,17 +51,17 @@ public class FlushOperationLoggerTest {
     request.setScope(FlushScope.ALL);
     request.setFlushRedis(true);
     request.setFlushInMemory(false);
-    
+
     ActionCacheFlushResponse response = new ActionCacheFlushResponse();
     response.setSuccess(true);
     response.setEntriesRemoved(10);
     Map<String, Integer> entriesRemovedByBackend = new HashMap<>();
     entriesRemovedByBackend.put("redis", 10);
     response.setEntriesRemovedByBackend(entriesRemovedByBackend);
-    
+
     // Act
     logger.logActionCacheFlush(username, request, response);
-    
+
     // Assert
     assertTrue(logHandler.hasLogRecordWithLevel(Level.INFO));
     assertTrue(logHandler.hasLogRecordWithMessage("Action Cache flush operation"));
@@ -82,14 +80,14 @@ public class FlushOperationLoggerTest {
     request.setScope(FlushScope.INSTANCE);
     request.setInstanceName("test-instance");
     request.setFlushRedis(true);
-    
+
     ActionCacheFlushResponse response = new ActionCacheFlushResponse();
     response.setSuccess(true);
     response.setEntriesRemoved(5);
-    
+
     // Act
     logger.logActionCacheFlush(username, request, response);
-    
+
     // Assert
     assertTrue(logHandler.hasLogRecordWithMessage("instanceName='test-instance'"));
   }
@@ -102,14 +100,14 @@ public class FlushOperationLoggerTest {
     request.setScope(FlushScope.DIGEST_PREFIX);
     request.setDigestPrefix("abc123");
     request.setFlushRedis(true);
-    
+
     ActionCacheFlushResponse response = new ActionCacheFlushResponse();
     response.setSuccess(true);
     response.setEntriesRemoved(3);
-    
+
     // Act
     logger.logActionCacheFlush(username, request, response);
-    
+
     // Assert
     assertTrue(logHandler.hasLogRecordWithMessage("digestPrefix='abc123'"));
   }
@@ -121,14 +119,14 @@ public class FlushOperationLoggerTest {
     ActionCacheFlushRequest request = new ActionCacheFlushRequest();
     request.setScope(FlushScope.ALL);
     request.setFlushRedis(true);
-    
+
     ActionCacheFlushResponse response = new ActionCacheFlushResponse();
     response.setSuccess(false);
     response.setMessage("Failed to flush Action Cache");
-    
+
     // Act
     logger.logActionCacheFlush(username, request, response);
-    
+
     // Assert
     assertTrue(logHandler.hasLogRecordWithLevel(Level.WARNING));
     assertTrue(logHandler.hasLogRecordWithMessage("message='Failed to flush Action Cache'"));
@@ -143,7 +141,7 @@ public class FlushOperationLoggerTest {
     request.setFlushFilesystem(true);
     request.setFlushInMemoryLRU(false);
     request.setFlushRedisWorkerMap(false);
-    
+
     CASFlushResponse response = new CASFlushResponse();
     response.setSuccess(true);
     response.setEntriesRemoved(20);
@@ -154,10 +152,10 @@ public class FlushOperationLoggerTest {
     Map<String, Long> bytesReclaimedByBackend = new HashMap<>();
     bytesReclaimedByBackend.put("filesystem", 1024L);
     response.setBytesReclaimedByBackend(bytesReclaimedByBackend);
-    
+
     // Act
     logger.logCASFlush(username, request, response);
-    
+
     // Assert
     assertTrue(logHandler.hasLogRecordWithLevel(Level.INFO));
     assertTrue(logHandler.hasLogRecordWithMessage("CAS flush operation"));
@@ -176,10 +174,10 @@ public class FlushOperationLoggerTest {
     String username = "test-admin";
     String operationType = "Action Cache flush";
     Exception error = new RuntimeException("Test error");
-    
+
     // Act
     logger.logFlushError(username, operationType, error);
-    
+
     // Assert
     assertTrue(logHandler.hasLogRecordWithLevel(Level.SEVERE));
     assertTrue(logHandler.hasLogRecordWithMessage("Action Cache flush error"));
@@ -187,9 +185,7 @@ public class FlushOperationLoggerTest {
     assertTrue(logHandler.hasLogRecordWithMessage("error='Test error'"));
   }
 
-  /**
-   * Test log handler that captures log records for verification.
-   */
+  /** Test log handler that captures log records for verification. */
   private static class TestLogHandler extends Handler {
     private final java.util.List<LogRecord> records = new java.util.ArrayList<>();
 

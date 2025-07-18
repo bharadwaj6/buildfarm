@@ -1,8 +1,8 @@
 package build.buildfarm.admin.cache.adapter.cas;
 
+import build.bazel.remote.execution.v2.DigestFunction;
 import build.buildfarm.admin.cache.model.FlushCriteria;
 import build.buildfarm.admin.cache.model.FlushResult;
-import build.buildfarm.admin.cache.model.FlushScope;
 import build.buildfarm.cas.cfc.CASFileCache;
 import build.buildfarm.common.DigestUtil;
 import build.buildfarm.v1test.Digest;
@@ -11,7 +11,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import io.prometheus.client.Counter;
 import io.prometheus.client.Gauge;
-import build.bazel.remote.execution.v2.DigestFunction;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,34 +21,32 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/**
- * Implementation of {@link CASAdapter} for filesystem-backed Content Addressable Storage.
- */
+/** Implementation of {@link CASAdapter} for filesystem-backed Content Addressable Storage. */
 public class FilesystemCASAdapter implements CASAdapter {
-  
+
   private static final Logger logger = Logger.getLogger(FilesystemCASAdapter.class.getName());
-  
+
   // Prometheus metrics
   private static final Counter casFlushOperationsCounter =
       Counter.build()
           .name("cas_filesystem_flush_operations_total")
           .help("Total number of filesystem CAS flush operations")
           .register();
-  
+
   private static final Counter casEntriesRemovedCounter =
       Counter.build()
           .name("cas_filesystem_entries_removed_total")
           .help("Total number of filesystem CAS entries removed")
           .register();
-  
+
   private static final Gauge casBytesReclaimedGauge =
       Gauge.build()
           .name("cas_filesystem_bytes_reclaimed_total")
           .help("Total bytes reclaimed from filesystem CAS")
           .register();
-  
+
   private final CASFileCache fileCache;
-  
+
   /**
    * Creates a new FilesystemCASAdapter instance.
    *
@@ -58,13 +55,13 @@ public class FilesystemCASAdapter implements CASAdapter {
   public FilesystemCASAdapter(CASFileCache fileCache) {
     this.fileCache = Preconditions.checkNotNull(fileCache, "fileCache");
   }
-  
+
   @Override
   public FlushResult flushEntries(FlushCriteria criteria) {
     Preconditions.checkNotNull(criteria, "criteria");
-    
+
     casFlushOperationsCounter.inc();
-    
+
     switch (criteria.getScope()) {
       case ALL:
         return flushAllEntries();
@@ -76,7 +73,7 @@ public class FilesystemCASAdapter implements CASAdapter {
         return new FlushResult(false, "Unknown flush scope: " + criteria.getScope(), 0, 0);
     }
   }
-  
+
   /**
    * Flushes all CAS entries from the filesystem.
    *
@@ -87,17 +84,17 @@ public class FilesystemCASAdapter implements CASAdapter {
       List<Path> filesToDelete = findAllCasFiles();
       long bytesReclaimed = calculateTotalSize(filesToDelete);
       int entriesRemoved = deleteFiles(filesToDelete);
-      
+
       String message = String.format("Flushed %d CAS entries from filesystem", entriesRemoved);
       updateMetrics(entriesRemoved, bytesReclaimed);
-      
+
       return new FlushResult(true, message, entriesRemoved, bytesReclaimed);
     } catch (IOException e) {
       logger.log(Level.SEVERE, "Failed to flush all CAS entries", e);
       return new FlushResult(false, "Failed to flush CAS entries: " + e.getMessage(), 0, 0);
     }
   }
-  
+
   /**
    * Flushes CAS entries for a specific instance from the filesystem.
    *
@@ -109,18 +106,20 @@ public class FilesystemCASAdapter implements CASAdapter {
       List<Path> filesToDelete = findCasFilesForInstance(instanceName);
       long bytesReclaimed = calculateTotalSize(filesToDelete);
       int entriesRemoved = deleteFiles(filesToDelete);
-      
-      String message = String.format(
-          "Flushed %d CAS entries for instance %s from filesystem", entriesRemoved, instanceName);
+
+      String message =
+          String.format(
+              "Flushed %d CAS entries for instance %s from filesystem",
+              entriesRemoved, instanceName);
       updateMetrics(entriesRemoved, bytesReclaimed);
-      
+
       return new FlushResult(true, message, entriesRemoved, bytesReclaimed);
     } catch (IOException e) {
       logger.log(Level.SEVERE, "Failed to flush CAS entries for instance: " + instanceName, e);
       return new FlushResult(false, "Failed to flush CAS entries: " + e.getMessage(), 0, 0);
     }
   }
-  
+
   /**
    * Flushes CAS entries with a specific digest prefix from the filesystem.
    *
@@ -132,18 +131,21 @@ public class FilesystemCASAdapter implements CASAdapter {
       List<Path> filesToDelete = findCasFilesWithDigestPrefix(digestPrefix);
       long bytesReclaimed = calculateTotalSize(filesToDelete);
       int entriesRemoved = deleteFiles(filesToDelete);
-      
-      String message = String.format(
-          "Flushed %d CAS entries with digest prefix %s from filesystem", entriesRemoved, digestPrefix);
+
+      String message =
+          String.format(
+              "Flushed %d CAS entries with digest prefix %s from filesystem",
+              entriesRemoved, digestPrefix);
       updateMetrics(entriesRemoved, bytesReclaimed);
-      
+
       return new FlushResult(true, message, entriesRemoved, bytesReclaimed);
     } catch (IOException e) {
-      logger.log(Level.SEVERE, "Failed to flush CAS entries with digest prefix: " + digestPrefix, e);
+      logger.log(
+          Level.SEVERE, "Failed to flush CAS entries with digest prefix: " + digestPrefix, e);
       return new FlushResult(false, "Failed to flush CAS entries: " + e.getMessage(), 0, 0);
     }
   }
-  
+
   /**
    * Finds all CAS files in the filesystem.
    *
@@ -154,17 +156,15 @@ public class FilesystemCASAdapter implements CASAdapter {
   List<Path> findAllCasFiles() throws IOException {
     Path cacheRoot = fileCache.getRoot();
     List<Path> result = new ArrayList<>();
-    
+
     try (Stream<Path> paths = Files.walk(cacheRoot)) {
-      result = paths
-          .filter(Files::isRegularFile)
-          .filter(this::isCasFile)
-          .collect(Collectors.toList());
+      result =
+          paths.filter(Files::isRegularFile).filter(this::isCasFile).collect(Collectors.toList());
     }
-    
+
     return result;
   }
-  
+
   /**
    * Finds CAS files for a specific instance in the filesystem.
    *
@@ -179,7 +179,7 @@ public class FilesystemCASAdapter implements CASAdapter {
     // For now, we'll return an empty list
     return ImmutableList.of();
   }
-  
+
   /**
    * Finds CAS files with a specific digest prefix in the filesystem.
    *
@@ -191,18 +191,19 @@ public class FilesystemCASAdapter implements CASAdapter {
   List<Path> findCasFilesWithDigestPrefix(String digestPrefix) throws IOException {
     Path cacheRoot = fileCache.getRoot();
     List<Path> result = new ArrayList<>();
-    
+
     try (Stream<Path> paths = Files.walk(cacheRoot)) {
-      result = paths
-          .filter(Files::isRegularFile)
-          .filter(this::isCasFile)
-          .filter(path -> hasDigestPrefix(path, digestPrefix))
-          .collect(Collectors.toList());
+      result =
+          paths
+              .filter(Files::isRegularFile)
+              .filter(this::isCasFile)
+              .filter(path -> hasDigestPrefix(path, digestPrefix))
+              .collect(Collectors.toList());
     }
-    
+
     return result;
   }
-  
+
   /**
    * Checks if a file is a CAS file.
    *
@@ -212,16 +213,15 @@ public class FilesystemCASAdapter implements CASAdapter {
   @VisibleForTesting
   boolean isCasFile(Path path) {
     String fileName = path.getFileName().toString();
-    
+
     // CAS files have a specific naming pattern: hash_exec or hash
     // They don't end with "_dir" which indicates a directory entry
-    return !fileName.endsWith("_dir") && 
-           (fileName.contains("_") || isLikelyValidHash(fileName));
+    return !fileName.endsWith("_dir") && (fileName.contains("_") || isLikelyValidHash(fileName));
   }
-  
+
   /**
-   * Checks if a string is likely a valid hash.
-   * This is a simple implementation that checks if the string contains only hexadecimal characters.
+   * Checks if a string is likely a valid hash. This is a simple implementation that checks if the
+   * string contains only hexadecimal characters.
    *
    * @param hash the hash to check
    * @return true if the hash is likely valid, false otherwise
@@ -231,16 +231,16 @@ public class FilesystemCASAdapter implements CASAdapter {
     if (hash.length() < 8) {
       return false;
     }
-    
+
     for (char c : hash.toCharArray()) {
       if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F'))) {
         return false;
       }
     }
-    
+
     return true;
   }
-  
+
   /**
    * Checks if a file has a specific digest prefix.
    *
@@ -251,7 +251,7 @@ public class FilesystemCASAdapter implements CASAdapter {
   @VisibleForTesting
   boolean hasDigestPrefix(Path path, String digestPrefix) {
     String fileName = path.getFileName().toString();
-    
+
     // Extract the hash part from the file name
     String hash;
     if (fileName.contains("_")) {
@@ -268,10 +268,10 @@ public class FilesystemCASAdapter implements CASAdapter {
       // Just the hash
       hash = fileName;
     }
-    
+
     return hash.startsWith(digestPrefix);
   }
-  
+
   /**
    * Calculates the total size of the given files.
    *
@@ -281,7 +281,7 @@ public class FilesystemCASAdapter implements CASAdapter {
   @VisibleForTesting
   long calculateTotalSize(List<Path> files) {
     long totalSize = 0;
-    
+
     for (Path file : files) {
       try {
         totalSize += Files.size(file);
@@ -289,10 +289,10 @@ public class FilesystemCASAdapter implements CASAdapter {
         logger.log(Level.WARNING, "Failed to get size of file: " + file, e);
       }
     }
-    
+
     return totalSize;
   }
-  
+
   /**
    * Deletes the given files.
    *
@@ -302,7 +302,7 @@ public class FilesystemCASAdapter implements CASAdapter {
   @VisibleForTesting
   int deleteFiles(List<Path> files) {
     int deletedCount = 0;
-    
+
     for (Path file : files) {
       try {
         // First, try to remove the file from the CAS cache if it's tracked there
@@ -311,16 +311,18 @@ public class FilesystemCASAdapter implements CASAdapter {
           // This is an executable file
           String[] parts = fileName.split("_");
           String hash = parts.length == 3 ? parts[1] : parts[0];
-          Digest digest = DigestUtil.buildDigest(hash, Files.size(file), DigestFunction.Value.SHA256);
+          Digest digest =
+              DigestUtil.buildDigest(hash, Files.size(file), DigestFunction.Value.SHA256);
           // We can't directly call invalidateWrite as it's not public
           // This is a limitation of the current implementation
         } else if (!fileName.contains("_")) {
           // This is a regular file with just the hash
-          Digest digest = DigestUtil.buildDigest(fileName, Files.size(file), DigestFunction.Value.SHA256);
+          Digest digest =
+              DigestUtil.buildDigest(fileName, Files.size(file), DigestFunction.Value.SHA256);
           // We can't directly call invalidateWrite as it's not public
           // This is a limitation of the current implementation
         }
-        
+
         // Now delete the file
         Files.delete(file);
         deletedCount++;
@@ -328,10 +330,10 @@ public class FilesystemCASAdapter implements CASAdapter {
         logger.log(Level.WARNING, "Failed to delete file: " + file, e);
       }
     }
-    
+
     return deletedCount;
   }
-  
+
   /**
    * Updates metrics for the flush operation.
    *

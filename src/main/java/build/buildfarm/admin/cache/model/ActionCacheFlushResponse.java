@@ -3,18 +3,14 @@ package build.buildfarm.admin.cache.model;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Response from flushing Action Cache entries.
- */
+/** Response from flushing Action Cache entries. */
 public class ActionCacheFlushResponse {
   private boolean success;
   private String message;
   private int entriesRemoved;
   private Map<String, Integer> entriesRemovedByBackend;
 
-  /**
-   * Creates a new ActionCacheFlushResponse instance.
-   */
+  /** Creates a new ActionCacheFlushResponse instance. */
   public ActionCacheFlushResponse() {
     this.success = true;
     this.message = "";

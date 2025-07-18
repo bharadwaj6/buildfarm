@@ -7,7 +7,6 @@ import build.bazel.remote.execution.v2.Digest;
 import build.buildfarm.admin.cache.model.FlushCriteria;
 import build.buildfarm.admin.cache.model.FlushResult;
 import build.buildfarm.admin.cache.model.FlushScope;
-import com.google.protobuf.ByteString;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,10 +24,7 @@ public class ActionCacheTest {
 
   @Test
   public void testGetReturnsNullForNonExistentKey() {
-    Digest actionKey = Digest.newBuilder()
-        .setHash("non-existent")
-        .setSizeBytes(0)
-        .build();
+    Digest actionKey = Digest.newBuilder().setHash("non-existent").setSizeBytes(0).build();
 
     ActionResult result = actionCache.get(actionKey);
 
@@ -37,14 +33,9 @@ public class ActionCacheTest {
 
   @Test
   public void testPutAndGet() {
-    Digest actionKey = Digest.newBuilder()
-        .setHash("test-hash")
-        .setSizeBytes(10)
-        .build();
+    Digest actionKey = Digest.newBuilder().setHash("test-hash").setSizeBytes(10).build();
 
-    ActionResult actionResult = ActionResult.newBuilder()
-        .setExitCode(0)
-        .build();
+    ActionResult actionResult = ActionResult.newBuilder().setExitCode(0).build();
 
     actionCache.put(actionKey, actionResult);
     ActionResult retrievedResult = actionCache.get(actionKey);
@@ -54,17 +45,12 @@ public class ActionCacheTest {
 
   @Test
   public void testFlushAll() {
-    Digest actionKey = Digest.newBuilder()
-        .setHash("test-hash")
-        .setSizeBytes(10)
-        .build();
+    Digest actionKey = Digest.newBuilder().setHash("test-hash").setSizeBytes(10).build();
 
-    ActionResult actionResult = ActionResult.newBuilder()
-        .setExitCode(0)
-        .build();
+    ActionResult actionResult = ActionResult.newBuilder().setExitCode(0).build();
 
     actionCache.put(actionKey, actionResult);
-    
+
     FlushCriteria criteria = new FlushCriteria(FlushScope.ALL, null, null);
     FlushResult result = actionCache.flush(criteria);
 
@@ -75,25 +61,17 @@ public class ActionCacheTest {
 
   @Test
   public void testFlushByInstance() {
-    Digest actionKey1 = Digest.newBuilder()
-        .setHash("test-hash-1")
-        .setSizeBytes(10)
-        .build();
+    Digest actionKey1 = Digest.newBuilder().setHash("test-hash-1").setSizeBytes(10).build();
 
-    Digest actionKey2 = Digest.newBuilder()
-        .setHash("test-hash-2")
-        .setSizeBytes(10)
-        .build();
+    Digest actionKey2 = Digest.newBuilder().setHash("test-hash-2").setSizeBytes(10).build();
 
-    ActionResult actionResult = ActionResult.newBuilder()
-        .setExitCode(0)
-        .build();
+    ActionResult actionResult = ActionResult.newBuilder().setExitCode(0).build();
 
     actionCache.put(actionKey1, actionResult);
     actionCache.put(actionKey2, actionResult);
     actionCache.setInstanceForKey(actionKey1, "instance1");
     actionCache.setInstanceForKey(actionKey2, "instance2");
-    
+
     FlushCriteria criteria = new FlushCriteria(FlushScope.INSTANCE, "instance1", null);
     FlushResult result = actionCache.flush(criteria);
 
@@ -105,23 +83,15 @@ public class ActionCacheTest {
 
   @Test
   public void testFlushByDigestPrefix() {
-    Digest actionKey1 = Digest.newBuilder()
-        .setHash("abc123")
-        .setSizeBytes(10)
-        .build();
+    Digest actionKey1 = Digest.newBuilder().setHash("abc123").setSizeBytes(10).build();
 
-    Digest actionKey2 = Digest.newBuilder()
-        .setHash("def456")
-        .setSizeBytes(10)
-        .build();
+    Digest actionKey2 = Digest.newBuilder().setHash("def456").setSizeBytes(10).build();
 
-    ActionResult actionResult = ActionResult.newBuilder()
-        .setExitCode(0)
-        .build();
+    ActionResult actionResult = ActionResult.newBuilder().setExitCode(0).build();
 
     actionCache.put(actionKey1, actionResult);
     actionCache.put(actionKey2, actionResult);
-    
+
     FlushCriteria criteria = new FlushCriteria(FlushScope.DIGEST_PREFIX, null, "abc");
     FlushResult result = actionCache.flush(criteria);
 
@@ -131,9 +101,7 @@ public class ActionCacheTest {
     assertThat(actionCache.get(actionKey2)).isEqualTo(actionResult);
   }
 
-  /**
-   * Test implementation of ActionCache for testing the interface contract.
-   */
+  /** Test implementation of ActionCache for testing the interface contract. */
   private static class TestActionCache implements ActionCache {
     private final java.util.Map<Digest, ActionResult> cache = new java.util.HashMap<>();
     private final java.util.Map<Digest, String> instanceMap = new java.util.HashMap<>();
@@ -151,14 +119,15 @@ public class ActionCacheTest {
     @Override
     public FlushResult flush(FlushCriteria criteria) {
       int entriesRemoved = 0;
-      
+
       if (criteria.getScope() == FlushScope.ALL) {
         entriesRemoved = cache.size();
         cache.clear();
         instanceMap.clear();
       } else if (criteria.getScope() == FlushScope.INSTANCE) {
         String instanceName = criteria.getInstanceName();
-        java.util.Iterator<java.util.Map.Entry<Digest, String>> it = instanceMap.entrySet().iterator();
+        java.util.Iterator<java.util.Map.Entry<Digest, String>> it =
+            instanceMap.entrySet().iterator();
         while (it.hasNext()) {
           java.util.Map.Entry<Digest, String> entry = it.next();
           if (instanceName.equals(entry.getValue())) {
@@ -179,7 +148,7 @@ public class ActionCacheTest {
           }
         }
       }
-      
+
       return new FlushResult(true, "Flushed " + entriesRemoved + " entries", entriesRemoved, 0);
     }
 

@@ -1,7 +1,6 @@
 package build.buildfarm.admin.cache.metrics;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -23,9 +22,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Integration tests for {@link CacheFlushMetrics} with {@link CacheFlushServiceImpl}.
- */
+/** Integration tests for {@link CacheFlushMetrics} with {@link CacheFlushServiceImpl}. */
 @RunWith(JUnit4.class)
 public class CacheFlushMetricsIntegrationTest {
 
@@ -38,27 +35,25 @@ public class CacheFlushMetricsIntegrationTest {
   public void setUp() {
     // Get the default registry that our metrics are registered with
     registry = CollectorRegistry.defaultRegistry;
-    
+
     // Create mock adapters
     mockRedisActionCacheAdapter = mock(ActionCacheAdapter.class);
     mockFilesystemCASAdapter = mock(CASAdapter.class);
-    
+
     // Set up the mock adapters to return successful results
-    when(mockRedisActionCacheAdapter.flushEntries(
-        new FlushCriteria(FlushScope.ALL, null, null)))
+    when(mockRedisActionCacheAdapter.flushEntries(new FlushCriteria(FlushScope.ALL, null, null)))
         .thenReturn(new FlushResult(true, "Success", 10, 0));
-    
-    when(mockFilesystemCASAdapter.flushEntries(
-        new FlushCriteria(FlushScope.ALL, null, null)))
+
+    when(mockFilesystemCASAdapter.flushEntries(new FlushCriteria(FlushScope.ALL, null, null)))
         .thenReturn(new FlushResult(true, "Success", 5, 1024));
-    
+
     // Create adapter maps
     Map<String, ActionCacheAdapter> actionCacheAdapters = new HashMap<>();
     actionCacheAdapters.put("redis", mockRedisActionCacheAdapter);
-    
+
     Map<String, CASAdapter> casAdapters = new HashMap<>();
     casAdapters.put("filesystem", mockFilesystemCASAdapter);
-    
+
     // Create the service
     cacheFlushService = new CacheFlushServiceImpl(actionCacheAdapters, casAdapters);
   }
@@ -76,24 +71,26 @@ public class CacheFlushMetricsIntegrationTest {
     request.setScope(FlushScope.ALL);
     request.setFlushRedis(true);
     request.setFlushInMemory(false);
-    
+
     // Perform the flush operation
     cacheFlushService.flushActionCache(request);
-    
+
     // Verify the operation metric was recorded
-    double operationCount = registry.getSampleValue(
-        "cache_flush_operations_total",
-        new String[] {"cache_type", "backend", "scope", "success"},
-        new String[] {"action-cache", "redis", "ALL", "true"});
-    
+    double operationCount =
+        registry.getSampleValue(
+            "cache_flush_operations_total",
+            new String[] {"cache_type", "backend", "scope", "success"},
+            new String[] {"action-cache", "redis", "ALL", "true"});
+
     assertEquals("Should record one successful operation", 1.0, operationCount, 0.001);
-    
+
     // Verify the entries removed metric was recorded
-    double entriesRemovedCount = registry.getSampleValue(
-        "cache_flush_entries_removed_total",
-        new String[] {"cache_type", "backend"},
-        new String[] {"action-cache", "redis"});
-    
+    double entriesRemovedCount =
+        registry.getSampleValue(
+            "cache_flush_entries_removed_total",
+            new String[] {"cache_type", "backend"},
+            new String[] {"action-cache", "redis"});
+
     assertEquals("Should record 10 entries removed", 10.0, entriesRemovedCount, 0.001);
   }
 
@@ -105,32 +102,35 @@ public class CacheFlushMetricsIntegrationTest {
     request.setFlushFilesystem(true);
     request.setFlushInMemoryLRU(false);
     request.setFlushRedisWorkerMap(false);
-    
+
     // Perform the flush operation
     cacheFlushService.flushCAS(request);
-    
+
     // Verify the operation metric was recorded
-    double operationCount = registry.getSampleValue(
-        "cache_flush_operations_total",
-        new String[] {"cache_type", "backend", "scope", "success"},
-        new String[] {"cas", "filesystem", "ALL", "true"});
-    
+    double operationCount =
+        registry.getSampleValue(
+            "cache_flush_operations_total",
+            new String[] {"cache_type", "backend", "scope", "success"},
+            new String[] {"cas", "filesystem", "ALL", "true"});
+
     assertEquals("Should record one successful operation", 1.0, operationCount, 0.001);
-    
+
     // Verify the entries removed metric was recorded
-    double entriesRemovedCount = registry.getSampleValue(
-        "cache_flush_entries_removed_total",
-        new String[] {"cache_type", "backend"},
-        new String[] {"cas", "filesystem"});
-    
+    double entriesRemovedCount =
+        registry.getSampleValue(
+            "cache_flush_entries_removed_total",
+            new String[] {"cache_type", "backend"},
+            new String[] {"cas", "filesystem"});
+
     assertEquals("Should record 5 entries removed", 5.0, entriesRemovedCount, 0.001);
-    
+
     // Verify the bytes reclaimed metric was recorded
-    double bytesReclaimedCount = registry.getSampleValue(
-        "cache_flush_bytes_reclaimed_total",
-        new String[] {"cache_type", "backend"},
-        new String[] {"cas", "filesystem"});
-    
+    double bytesReclaimedCount =
+        registry.getSampleValue(
+            "cache_flush_bytes_reclaimed_total",
+            new String[] {"cache_type", "backend"},
+            new String[] {"cas", "filesystem"});
+
     assertEquals("Should record 1024 bytes reclaimed", 1024.0, bytesReclaimedCount, 0.001);
   }
 }

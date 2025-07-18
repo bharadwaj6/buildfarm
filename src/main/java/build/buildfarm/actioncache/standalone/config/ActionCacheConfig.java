@@ -4,15 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
 
-/**
- * Configuration for the standalone Action Cache.
- */
+/** Configuration for the standalone Action Cache. */
 public class ActionCacheConfig {
   private boolean enableInMemoryCache = true;
   private int inMemoryCacheMaxSize = 10000;
   private List<AdapterConfig> adapters = new ArrayList<>();
   private CacheEvictionPolicy evictionPolicy = CacheEvictionPolicy.LRU;
-  
+
   /**
    * Returns whether the in-memory cache is enabled.
    *
@@ -21,7 +19,7 @@ public class ActionCacheConfig {
   public boolean isEnableInMemoryCache() {
     return enableInMemoryCache;
   }
-  
+
   /**
    * Sets whether the in-memory cache is enabled.
    *
@@ -30,7 +28,7 @@ public class ActionCacheConfig {
   public void setEnableInMemoryCache(boolean enableInMemoryCache) {
     this.enableInMemoryCache = enableInMemoryCache;
   }
-  
+
   /**
    * Returns the maximum size of the in-memory cache.
    *
@@ -39,7 +37,7 @@ public class ActionCacheConfig {
   public int getInMemoryCacheMaxSize() {
     return inMemoryCacheMaxSize;
   }
-  
+
   /**
    * Sets the maximum size of the in-memory cache.
    *
@@ -48,7 +46,7 @@ public class ActionCacheConfig {
   public void setInMemoryCacheMaxSize(int inMemoryCacheMaxSize) {
     this.inMemoryCacheMaxSize = inMemoryCacheMaxSize;
   }
-  
+
   /**
    * Returns the list of adapter configurations.
    *
@@ -57,7 +55,7 @@ public class ActionCacheConfig {
   public List<AdapterConfig> getAdapters() {
     return adapters;
   }
-  
+
   /**
    * Sets the list of adapter configurations.
    *
@@ -66,7 +64,7 @@ public class ActionCacheConfig {
   public void setAdapters(List<AdapterConfig> adapters) {
     this.adapters = adapters;
   }
-  
+
   /**
    * Returns the cache eviction policy.
    *
@@ -75,7 +73,7 @@ public class ActionCacheConfig {
   public CacheEvictionPolicy getEvictionPolicy() {
     return evictionPolicy;
   }
-  
+
   /**
    * Sets the cache eviction policy.
    *
@@ -84,7 +82,7 @@ public class ActionCacheConfig {
   public void setEvictionPolicy(CacheEvictionPolicy evictionPolicy) {
     this.evictionPolicy = evictionPolicy;
   }
-  
+
   /**
    * Validates the configuration.
    *
@@ -95,14 +93,14 @@ public class ActionCacheConfig {
     if (inMemoryCacheMaxSize <= 0) {
       return "In-memory cache max size must be greater than 0";
     }
-    
+
     for (AdapterConfig adapter : adapters) {
       String validationError = adapter.validate();
       if (validationError != null) {
         return validationError;
       }
     }
-    
+
     return null;
   }
 }

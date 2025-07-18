@@ -1,8 +1,6 @@
 package build.buildfarm.admin.cache.model;
 
-/**
- * Request to flush Action Cache entries.
- */
+/** Request to flush Action Cache entries. */
 public class ActionCacheFlushRequest {
   private FlushScope scope;
   private String instanceName;

@@ -3,9 +3,7 @@ package build.buildfarm.admin.cache.model;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Error response model for API errors.
- */
+/** Error response model for API errors. */
 public class ErrorResponse {
   private String errorCode;
   private String message;

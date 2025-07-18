@@ -5,25 +5,21 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
-/**
- * Service for controlling concurrency of flush operations.
- */
+/** Service for controlling concurrency of flush operations. */
 public class ConcurrencyControlService {
   private static final Logger logger = Logger.getLogger(ConcurrencyControlService.class.getName());
-  
+
   private final Semaphore actionCacheSemaphore;
   private final Semaphore casSemaphore;
   private final AtomicInteger activeActionCacheFlushes = new AtomicInteger(0);
   private final AtomicInteger activeCASFlushes = new AtomicInteger(0);
   private final ConcurrencyConfig config;
-  
-  /**
-   * Creates a new ConcurrencyControlService with the default configuration.
-   */
+
+  /** Creates a new ConcurrencyControlService with the default configuration. */
   public ConcurrencyControlService() {
     this(ConcurrencyConfig.getDefault());
   }
-  
+
   /**
    * Creates a new ConcurrencyControlService with the specified configuration.
    *
@@ -34,7 +30,7 @@ public class ConcurrencyControlService {
     this.actionCacheSemaphore = new Semaphore(config.getMaxConcurrentActionCacheFlushes(), true);
     this.casSemaphore = new Semaphore(config.getMaxConcurrentCASFlushes(), true);
   }
-  
+
   /**
    * Acquires a permit to perform an Action Cache flush operation.
    *
@@ -45,10 +41,11 @@ public class ConcurrencyControlService {
       activeActionCacheFlushes.incrementAndGet();
       return true;
     }
-    
+
     try {
-      boolean acquired = actionCacheSemaphore.tryAcquire(
-          config.getFlushOperationTimeoutMs(), TimeUnit.MILLISECONDS);
+      boolean acquired =
+          actionCacheSemaphore.tryAcquire(
+              config.getFlushOperationTimeoutMs(), TimeUnit.MILLISECONDS);
       if (acquired) {
         activeActionCacheFlushes.incrementAndGet();
       }
@@ -59,20 +56,18 @@ public class ConcurrencyControlService {
       return false;
     }
   }
-  
-  /**
-   * Releases a permit for an Action Cache flush operation.
-   */
+
+  /** Releases a permit for an Action Cache flush operation. */
   public void releaseActionCacheFlushPermit() {
     if (!config.isEnabled()) {
       activeActionCacheFlushes.decrementAndGet();
       return;
     }
-    
+
     activeActionCacheFlushes.decrementAndGet();
     actionCacheSemaphore.release();
   }
-  
+
   /**
    * Acquires a permit to perform a CAS flush operation.
    *
@@ -83,10 +78,10 @@ public class ConcurrencyControlService {
       activeCASFlushes.incrementAndGet();
       return true;
     }
-    
+
     try {
-      boolean acquired = casSemaphore.tryAcquire(
-          config.getFlushOperationTimeoutMs(), TimeUnit.MILLISECONDS);
+      boolean acquired =
+          casSemaphore.tryAcquire(config.getFlushOperationTimeoutMs(), TimeUnit.MILLISECONDS);
       if (acquired) {
         activeCASFlushes.incrementAndGet();
       }
@@ -97,20 +92,18 @@ public class ConcurrencyControlService {
       return false;
     }
   }
-  
-  /**
-   * Releases a permit for a CAS flush operation.
-   */
+
+  /** Releases a permit for a CAS flush operation. */
   public void releaseCASFlushPermit() {
     if (!config.isEnabled()) {
       activeCASFlushes.decrementAndGet();
       return;
     }
-    
+
     activeCASFlushes.decrementAndGet();
     casSemaphore.release();
   }
-  
+
   /**
    * Gets the number of active Action Cache flush operations.
    *
@@ -119,7 +112,7 @@ public class ConcurrencyControlService {
   public int getActiveActionCacheFlushes() {
     return activeActionCacheFlushes.get();
   }
-  
+
   /**
    * Gets the number of active CAS flush operations.
    *
@@ -128,7 +121,7 @@ public class ConcurrencyControlService {
   public int getActiveCASFlushes() {
     return activeCASFlushes.get();
   }
-  
+
   /**
    * Gets the number of available Action Cache flush permits.
    *
@@ -137,7 +130,7 @@ public class ConcurrencyControlService {
   public int getAvailableActionCacheFlushPermits() {
     return actionCacheSemaphore.availablePermits();
   }
-  
+
   /**
    * Gets the number of available CAS flush permits.
    *
@@ -146,7 +139,7 @@ public class ConcurrencyControlService {
   public int getAvailableCASFlushPermits() {
     return casSemaphore.availablePermits();
   }
-  
+
   /**
    * Gets the concurrency configuration.
    *

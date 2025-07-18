@@ -30,17 +30,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Tests for concurrency controls in {@link CacheFlushServiceImpl}.
- */
+/** Tests for concurrency controls in {@link CacheFlushServiceImpl}. */
 @RunWith(JUnit4.class)
 public class CacheFlushServiceConcurrencyTest {
-  
+
   private CacheFlushServiceImpl cacheFlushService;
   private ConcurrencyControlService concurrencyControlService;
   private Map<String, ActionCacheAdapter> actionCacheAdapters;
   private Map<String, CASAdapter> casAdapters;
-  
+
   @Before
   public void setUp() {
     // Set up mock adapters
@@ -49,68 +47,69 @@ public class CacheFlushServiceConcurrencyTest {
     when(mockRedisAdapter.flushEntries(any(FlushCriteria.class)))
         .thenReturn(new FlushResult(true, "Success", 5, 0));
     actionCacheAdapters.put("redis", mockRedisAdapter);
-    
+
     casAdapters = new HashMap<>();
     CASAdapter mockFilesystemAdapter = mock(CASAdapter.class);
     when(mockFilesystemAdapter.flushEntries(any(FlushCriteria.class)))
         .thenReturn(new FlushResult(true, "Success", 5, 1024));
     casAdapters.put("filesystem", mockFilesystemAdapter);
-    
+
     // Set up concurrency control service with limited permits
     ConcurrencyConfig config = new ConcurrencyConfig(2, 1, 1000, true);
     concurrencyControlService = new ConcurrencyControlService(config);
-    
+
     // Create the service
-    cacheFlushService = new CacheFlushServiceImpl(actionCacheAdapters, casAdapters, concurrencyControlService);
+    cacheFlushService =
+        new CacheFlushServiceImpl(actionCacheAdapters, casAdapters, concurrencyControlService);
   }
-  
+
   @Test
   public void testFlushActionCache_concurrencyLimitReached() throws Exception {
     // Create requests
     ActionCacheFlushRequest request = new ActionCacheFlushRequest();
     request.setScope(FlushScope.ALL);
     request.setFlushRedis(true);
-    
+
     // Acquire all permits
     assertTrue(concurrencyControlService.acquireActionCacheFlushPermit());
     assertTrue(concurrencyControlService.acquireActionCacheFlushPermit());
-    
+
     // Call the service
     ActionCacheFlushResponse response = cacheFlushService.flushActionCache(request);
-    
+
     // Verify the response
     assertFalse(response.isSuccess());
     assertTrue(response.getMessage().contains("Concurrency limit reached"));
     assertEquals(0, response.getEntriesRemoved());
-    
+
     // Release permits
     concurrencyControlService.releaseActionCacheFlushPermit();
     concurrencyControlService.releaseActionCacheFlushPermit();
   }
-  
+
   @Test
   public void testFlushCAS_concurrencyLimitReached() throws Exception {
     // Create requests
     CASFlushRequest request = new CASFlushRequest();
     request.setScope(FlushScope.ALL);
     request.setFlushFilesystem(true);
-    
+
     // Acquire all permits
     assertTrue(concurrencyControlService.acquireCASFlushPermit());
-    
+
     // Call the service
     CASFlushResponse response = cacheFlushService.flushCAS(request);
-    
+
     // Verify the response
     assertFalse(response.isSuccess());
     assertTrue(response.getMessage().contains("Concurrency limit reached"));
     assertEquals(0, response.getEntriesRemoved());
     assertEquals(0, response.getBytesReclaimed());
-    
+
     // Release permits
     concurrencyControlService.releaseCASFlushPermit();
   }
-  
+
   @Test
   public void testConcurrentFlushActionCache() throws Exception {
     // Create multiple threads to flush Action Cache concurrently
@@ -119,39 +118,40 @@ public class CacheFlushServiceConcurrencyTest {
     CountDownLatch startLatch = new CountDownLatch(1);
     CountDownLatch completeLatch = new CountDownLatch(numThreads);
     AtomicInteger successCount = new AtomicInteger(0);
-    
+
     for (int i = 0; i < numThreads; i++) {
-      executor.submit(() -> {
-        try {
-          startLatch.await(); // Wait for all threads to be ready
-          
-          ActionCacheFlushRequest request = new ActionCacheFlushRequest();
-          request.setScope(FlushScope.ALL);
-          request.setFlushRedis(true);
-          
-          ActionCacheFlushResponse response = cacheFlushService.flushActionCache(request);
-          if (response.isSuccess()) {
-            successCount.incrementAndGet();
-          }
-        } catch (InterruptedException e) {
-          Thread.currentThread().interrupt();
-        } finally {
-          completeLatch.countDown();
-        }
-      });
+      executor.submit(
+          () -> {
+            try {
+              startLatch.await(); // Wait for all threads to be ready
+
+              ActionCacheFlushRequest request = new ActionCacheFlushRequest();
+              request.setScope(FlushScope.ALL);
+              request.setFlushRedis(true);
+
+              ActionCacheFlushResponse response = cacheFlushService.flushActionCache(request);
+              if (response.isSuccess()) {
+                successCount.incrementAndGet();
+              }
+            } catch (InterruptedException e) {
+              Thread.currentThread().interrupt();
+            } finally {
+              completeLatch.countDown();
+            }
+          });
     }
-    
+
     // Start all threads simultaneously
     startLatch.countDown();
-    
+
     // Wait for all threads to complete
     completeLatch.await(2000, TimeUnit.MILLISECONDS);
     executor.shutdown();
-    
+
     // Only 2 threads should have succeeded (concurrency limit is 2)
     assertEquals(2, successCount.get());
   }
-  
+
   @Test
   public void testConcurrentFlushCAS() throws Exception {
     // Create multiple threads to flush CAS concurrently
@@ -160,35 +160,36 @@ public class CacheFlushServiceConcurrencyTest {
     CountDownLatch startLatch = new CountDownLatch(1);
     CountDownLatch completeLatch = new CountDownLatch(numThreads);
     AtomicInteger successCount = new AtomicInteger(0);
-    
+
     for (int i = 0; i < numThreads; i++) {
-      executor.submit(() -> {
-        try {
-          startLatch.await(); // Wait for all threads to be ready
-          
-          CASFlushRequest request = new CASFlushRequest();
-          request.setScope(FlushScope.ALL);
-          request.setFlushFilesystem(true);
-          
-          CASFlushResponse response = cacheFlushService.flushCAS(request);
-          if (response.isSuccess()) {
-            successCount.incrementAndGet();
-          }
-        } catch (InterruptedException e) {
-          Thread.currentThread().interrupt();
-        } finally {
-          completeLatch.countDown();
-        }
-      });
+      executor.submit(
+          () -> {
+            try {
+              startLatch.await(); // Wait for all threads to be ready
+
+              CASFlushRequest request = new CASFlushRequest();
+              request.setScope(FlushScope.ALL);
+              request.setFlushFilesystem(true);
+
+              CASFlushResponse response = cacheFlushService.flushCAS(request);
+              if (response.isSuccess()) {
+                successCount.incrementAndGet();
+              }
+            } catch (InterruptedException e) {
+              Thread.currentThread().interrupt();
+            } finally {
+              completeLatch.countDown();
+            }
+          });
     }
-    
+
     // Start all threads simultaneously
     startLatch.countDown();
-    
+
     // Wait for all threads to complete
     completeLatch.await(2000, TimeUnit.MILLISECONDS);
     executor.shutdown();
-    
+
     // Only 1 thread should have succeeded (concurrency limit is 1)
     assertEquals(1, successCount.get());
   }

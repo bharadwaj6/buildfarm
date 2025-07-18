@@ -7,9 +7,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-/**
- * REST resource for admin UI pages.
- */
+/** REST resource for admin UI pages. */
 @Path("/admin/ui")
 public class AdminUIResource {
 
@@ -21,14 +19,15 @@ public class AdminUIResource {
   @GET
   @Produces(MediaType.TEXT_HTML)
   public Response getAdminDashboard() {
-    InputStream htmlStream = getClass().getClassLoader().getResourceAsStream("static/html/admin-dashboard.html");
-    
+    InputStream htmlStream =
+        getClass().getClassLoader().getResourceAsStream("static/html/admin-dashboard.html");
+
     if (htmlStream == null) {
       return Response.status(Response.Status.NOT_FOUND)
           .entity("Admin dashboard page not found")
           .build();
     }
-    
+
     return Response.ok(htmlStream).build();
   }
 
@@ -41,14 +40,15 @@ public class AdminUIResource {
   @Path("/cache-flush")
   @Produces(MediaType.TEXT_HTML)
   public Response getCacheFlushUI() {
-    InputStream htmlStream = getClass().getClassLoader().getResourceAsStream("static/html/cache-flush.html");
-    
+    InputStream htmlStream =
+        getClass().getClassLoader().getResourceAsStream("static/html/cache-flush.html");
+
     if (htmlStream == null) {
       return Response.status(Response.Status.NOT_FOUND)
           .entity("Cache flush UI page not found")
           .build();
     }
-    
+
     return Response.ok(htmlStream).build();
   }
 }

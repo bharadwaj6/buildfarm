@@ -8,9 +8,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-/**
- * Provider for static resources (CSS, JS, etc.).
- */
+/** Provider for static resources (CSS, JS, etc.). */
 @Path("/static")
 public class StaticResourceProvider {
 
@@ -61,13 +59,13 @@ public class StaticResourceProvider {
    */
   private Response getStaticResource(String resourcePath) {
     InputStream resourceStream = getClass().getClassLoader().getResourceAsStream(resourcePath);
-    
+
     if (resourceStream == null) {
       return Response.status(Response.Status.NOT_FOUND)
           .entity("Resource not found: " + resourcePath)
           .build();
     }
-    
+
     return Response.ok(resourceStream).build();
   }
 }

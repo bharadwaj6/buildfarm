@@ -23,19 +23,19 @@ public class AdminRoleFilterTest {
   @Mock private UriInfo uriInfo;
   @Mock private SecurityContext securityContext;
   @Mock private Principal principal;
-  
+
   private AuthConfig authConfig;
   private AdminRoleFilter filter;
 
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
-    
+
     authConfig = new AuthConfig();
     authConfig.setAuthEnabled(true);
-    
+
     filter = new AdminRoleFilter(authConfig);
-    
+
     when(requestContext.getUriInfo()).thenReturn(uriInfo);
     when(requestContext.getSecurityContext()).thenReturn(securityContext);
     when(securityContext.getUserPrincipal()).thenReturn(principal);
@@ -45,10 +45,10 @@ public class AdminRoleFilterTest {
   public void testFilterSkipsNonAdminPaths() throws IOException {
     // Setup
     when(uriInfo.getPath()).thenReturn("api/v1/some/path");
-    
+
     // Execute
     filter.filter(requestContext);
-    
+
     // Verify
     verify(requestContext, never()).abortWith(any(Response.class));
   }
@@ -58,10 +58,10 @@ public class AdminRoleFilterTest {
     // Setup
     when(uriInfo.getPath()).thenReturn("admin/v1/cache/action/flush");
     authConfig.setAuthEnabled(false);
-    
+
     // Execute
     filter.filter(requestContext);
-    
+
     // Verify
     verify(requestContext, never()).abortWith(any(Response.class));
   }
@@ -71,14 +71,14 @@ public class AdminRoleFilterTest {
     // Setup
     when(uriInfo.getPath()).thenReturn("admin/v1/cache/action/flush");
     when(securityContext.getUserPrincipal()).thenReturn(null);
-    
+
     // Execute
     filter.filter(requestContext);
-    
+
     // Verify
     ArgumentCaptor<Response> responseCaptor = ArgumentCaptor.forClass(Response.class);
     verify(requestContext).abortWith(responseCaptor.capture());
-    
+
     Response response = responseCaptor.getValue();
     assert response.getStatus() == Response.Status.UNAUTHORIZED.getStatusCode();
   }
@@ -88,14 +88,14 @@ public class AdminRoleFilterTest {
     // Setup
     when(uriInfo.getPath()).thenReturn("admin/v1/cache/action/flush");
     when(securityContext.isUserInRole("admin")).thenReturn(false);
-    
+
     // Execute
     filter.filter(requestContext);
-    
+
     // Verify
     ArgumentCaptor<Response> responseCaptor = ArgumentCaptor.forClass(Response.class);
     verify(requestContext).abortWith(responseCaptor.capture());
-    
+
     Response response = responseCaptor.getValue();
     assert response.getStatus() == Response.Status.FORBIDDEN.getStatusCode();
   }
@@ -105,10 +105,10 @@ public class AdminRoleFilterTest {
     // Setup
     when(uriInfo.getPath()).thenReturn("admin/v1/cache/action/flush");
     when(securityContext.isUserInRole("admin")).thenReturn(true);
-    
+
     // Execute
     filter.filter(requestContext);
-    
+
     // Verify
     verify(requestContext, never()).abortWith(any(Response.class));
   }

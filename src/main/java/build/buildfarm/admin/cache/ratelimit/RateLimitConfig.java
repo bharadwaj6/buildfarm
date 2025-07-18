@@ -1,13 +1,11 @@
 package build.buildfarm.admin.cache.ratelimit;
 
-/**
- * Configuration for rate limiting.
- */
+/** Configuration for rate limiting. */
 public class RateLimitConfig {
   private final int maxOperationsPerWindow;
   private final long windowSizeMs;
   private final boolean enabled;
-  
+
   /**
    * Creates a new RateLimitConfig.
    *
@@ -20,7 +18,7 @@ public class RateLimitConfig {
     this.windowSizeMs = windowSizeMs;
     this.enabled = enabled;
   }
-  
+
   /**
    * Gets the maximum number of operations allowed per time window.
    *
@@ -29,7 +27,7 @@ public class RateLimitConfig {
   public int getMaxOperationsPerWindow() {
     return maxOperationsPerWindow;
   }
-  
+
   /**
    * Gets the size of the time window in milliseconds.
    *
@@ -38,7 +36,7 @@ public class RateLimitConfig {
   public long getWindowSizeMs() {
     return windowSizeMs;
   }
-  
+
   /**
    * Checks if rate limiting is enabled.
    *
@@ -47,7 +45,7 @@ public class RateLimitConfig {
   public boolean isEnabled() {
     return enabled;
   }
-  
+
   /**
    * Creates a default configuration with rate limiting enabled.
    *
@@ -56,7 +54,7 @@ public class RateLimitConfig {
   public static RateLimitConfig getDefault() {
     return new RateLimitConfig(10, 60000, true); // 10 operations per minute
   }
-  
+
   /**
    * Creates a configuration with rate limiting disabled.
    *

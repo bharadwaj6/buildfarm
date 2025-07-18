@@ -8,9 +8,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Tests for {@link AdminUIResource}.
- */
+/** Tests for {@link AdminUIResource}. */
 @RunWith(JUnit4.class)
 public class AdminUIResourceTest {
 
@@ -18,10 +16,10 @@ public class AdminUIResourceTest {
   public void getAdminDashboard_returnsHtmlResponse() {
     // Arrange
     AdminUIResource resource = new AdminUIResource();
-    
+
     // Act
     Response response = resource.getAdminDashboard();
-    
+
     // Assert
     assertNotNull(response);
     assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
@@ -32,10 +30,10 @@ public class AdminUIResourceTest {
   public void getCacheFlushUI_returnsHtmlResponse() {
     // Arrange
     AdminUIResource resource = new AdminUIResource();
-    
+
     // Act
     Response response = resource.getCacheFlushUI();
-    
+
     // Assert
     assertNotNull(response);
     assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());

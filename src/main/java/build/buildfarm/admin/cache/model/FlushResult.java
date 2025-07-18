@@ -1,17 +1,13 @@
 package build.buildfarm.admin.cache.model;
 
-/**
- * Result of a cache flush operation.
- */
+/** Result of a cache flush operation. */
 public class FlushResult {
   private boolean success;
   private String message;
   private int entriesRemoved;
   private long bytesReclaimed;
 
-  /**
-   * Creates a new FlushResult instance.
-   */
+  /** Creates a new FlushResult instance. */
   public FlushResult() {
     this.success = true;
     this.message = "";

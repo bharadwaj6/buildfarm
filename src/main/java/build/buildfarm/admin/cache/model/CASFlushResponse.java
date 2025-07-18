@@ -3,9 +3,7 @@ package build.buildfarm.admin.cache.model;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Response from flushing Content Addressable Storage entries.
- */
+/** Response from flushing Content Addressable Storage entries. */
 public class CASFlushResponse {
   private boolean success;
   private String message;
@@ -14,9 +12,7 @@ public class CASFlushResponse {
   private Map<String, Integer> entriesRemovedByBackend;
   private Map<String, Long> bytesReclaimedByBackend;
 
-  /**
-   * Creates a new CASFlushResponse instance.
-   */
+  /** Creates a new CASFlushResponse instance. */
   public CASFlushResponse() {
     this.success = true;
     this.message = "";

@@ -5,9 +5,7 @@ import build.buildfarm.admin.cache.model.ActionCacheFlushResponse;
 import build.buildfarm.admin.cache.model.CASFlushRequest;
 import build.buildfarm.admin.cache.model.CASFlushResponse;
 
-/**
- * Service for flushing caches.
- */
+/** Service for flushing caches. */
 public interface CacheFlushService {
   /**
    * Flushes Action Cache entries based on specified criteria.
@@ -16,7 +14,7 @@ public interface CacheFlushService {
    * @return the flush response
    */
   ActionCacheFlushResponse flushActionCache(ActionCacheFlushRequest request);
-  
+
   /**
    * Flushes Content Addressable Storage entries based on specified criteria.
    *

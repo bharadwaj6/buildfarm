@@ -4,22 +4,18 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
-/**
- * Service for rate limiting API operations.
- */
+/** Service for rate limiting API operations. */
 public class RateLimitService {
   private static final Logger logger = Logger.getLogger(RateLimitService.class.getName());
-  
+
   private final Map<String, RateLimiter> operationRateLimiters = new ConcurrentHashMap<>();
   private final RateLimitConfig config;
-  
-  /**
-   * Creates a new RateLimitService with the default configuration.
-   */
+
+  /** Creates a new RateLimitService with the default configuration. */
   public RateLimitService() {
     this(RateLimitConfig.getDefault());
   }
-  
+
   /**
    * Creates a new RateLimitService with the specified configuration.
    *
@@ -27,16 +23,18 @@ public class RateLimitService {
    */
   public RateLimitService(RateLimitConfig config) {
     this.config = config;
-    
+
     // Initialize rate limiters for different operation types
     if (config.isEnabled()) {
-      operationRateLimiters.put("action-cache-flush", 
+      operationRateLimiters.put(
+          "action-cache-flush",
           new RateLimiter(config.getMaxOperationsPerWindow(), config.getWindowSizeMs()));
-      operationRateLimiters.put("cas-flush", 
+      operationRateLimiters.put(
+          "cas-flush",
           new RateLimiter(config.getMaxOperationsPerWindow(), config.getWindowSizeMs()));
     }
   }
-  
+
   /**
    * Checks if an operation is allowed for the given user and operation type.
    *
@@ -48,19 +46,19 @@ public class RateLimitService {
     if (!config.isEnabled()) {
       return true;
     }
-    
+
     RateLimiter rateLimiter = operationRateLimiters.get(operationType);
     if (rateLimiter == null) {
       logger.warning("No rate limiter found for operation type: " + operationType);
       return true;
     }
-    
+
     return rateLimiter.allowOperation(username, operationType);
   }
-  
+
   /**
-   * Gets the number of operations performed by the given user for the given operation type
-   * in the current time window.
+   * Gets the number of operations performed by the given user for the given operation type in the
+   * current time window.
    *
    * @param username the username
    * @param operationType the operation type
@@ -70,15 +68,15 @@ public class RateLimitService {
     if (!config.isEnabled()) {
       return 0;
     }
-    
+
     RateLimiter rateLimiter = operationRateLimiters.get(operationType);
     if (rateLimiter == null) {
       return 0;
     }
-    
+
     return rateLimiter.getOperationCount(username, operationType);
   }
-  
+
   /**
    * Gets the time remaining in the current window for the given user and operation type.
    *
@@ -90,15 +88,15 @@ public class RateLimitService {
     if (!config.isEnabled()) {
       return 0;
     }
-    
+
     RateLimiter rateLimiter = operationRateLimiters.get(operationType);
     if (rateLimiter == null) {
       return 0;
     }
-    
+
     return rateLimiter.getTimeRemainingInWindow(username);
   }
-  
+
   /**
    * Gets the rate limit configuration.
    *

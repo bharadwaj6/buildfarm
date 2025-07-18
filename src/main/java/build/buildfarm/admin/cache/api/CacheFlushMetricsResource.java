@@ -8,9 +8,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-/**
- * REST resource for cache flush metrics.
- */
+/** REST resource for cache flush metrics. */
 @Path("/admin/v1/cache/metrics")
 public class CacheFlushMetricsResource {
 

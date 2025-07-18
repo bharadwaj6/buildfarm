@@ -2,9 +2,7 @@ package build.buildfarm.admin.auth;
 
 import java.security.Principal;
 
-/**
- * Principal implementation for admin users.
- */
+/** Principal implementation for admin users. */
 public class AdminPrincipal implements Principal {
   private final String name;
   private final boolean isAdmin;

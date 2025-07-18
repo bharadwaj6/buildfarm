@@ -8,9 +8,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Tests for {@link StaticResourceProvider}.
- */
+/** Tests for {@link StaticResourceProvider}. */
 @RunWith(JUnit4.class)
 public class StaticResourceProviderTest {
 
@@ -18,10 +16,10 @@ public class StaticResourceProviderTest {
   public void getCssResource_returnsValidResponse() {
     // Arrange
     StaticResourceProvider provider = new StaticResourceProvider();
-    
+
     // Act
     Response response = provider.getCssResource("cache-flush.css");
-    
+
     // Assert
     assertNotNull(response);
     assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
@@ -32,10 +30,10 @@ public class StaticResourceProviderTest {
   public void getJsResource_returnsValidResponse() {
     // Arrange
     StaticResourceProvider provider = new StaticResourceProvider();
-    
+
     // Act
     Response response = provider.getJsResource("cache-flush.js");
-    
+
     // Assert
     assertNotNull(response);
     assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
@@ -46,10 +44,10 @@ public class StaticResourceProviderTest {
   public void getHtmlResource_returnsValidResponse() {
     // Arrange
     StaticResourceProvider provider = new StaticResourceProvider();
-    
+
     // Act
     Response response = provider.getHtmlResource("cache-flush.html");
-    
+
     // Assert
     assertNotNull(response);
     assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
@@ -60,10 +58,10 @@ public class StaticResourceProviderTest {
   public void getNonExistentResource_returns404() {
     // Arrange
     StaticResourceProvider provider = new StaticResourceProvider();
-    
+
     // Act
     Response response = provider.getCssResource("non-existent.css");
-    
+
     // Assert
     assertNotNull(response);
     assertEquals(Response.Status.NOT_FOUND.getStatusCode(), response.getStatus());

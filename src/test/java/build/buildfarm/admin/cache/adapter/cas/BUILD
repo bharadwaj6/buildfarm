@@ -4,7 +4,7 @@ java_test(
     deps = [
         "//src/main/java/build/buildfarm/admin/cache/adapter/cas",
         "//src/main/java/build/buildfarm/admin/cache/model",
-        "//src/main/java/build/buildfarm/cas/cfc:cfc",
+        "//src/main/java/build/buildfarm/cas/cfc",
         "//src/main/java/build/buildfarm/common",
         "//src/main/protobuf:build_buildfarm_v1test_buildfarm_java_proto",
         "@maven//:com_google_guava_guava",
@@ -20,7 +20,7 @@ java_test(
     deps = [
         "//src/main/java/build/buildfarm/admin/cache/adapter/cas",
         "//src/main/java/build/buildfarm/admin/cache/model",
-        "//src/main/java/build/buildfarm/cas:cas",
+        "//src/main/java/build/buildfarm/cas",
         "//src/main/java/build/buildfarm/common",
         "@maven//:com_google_guava_guava",
         "@maven//:com_google_truth_truth",

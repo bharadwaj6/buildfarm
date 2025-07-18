@@ -12,7 +12,7 @@ public class FlushCriteriaTest {
   @Test
   public void testConstructorWithAllScope() {
     FlushCriteria criteria = new FlushCriteria(FlushScope.ALL, null, null);
-    
+
     assertThat(criteria.getScope()).isEqualTo(FlushScope.ALL);
     assertThat(criteria.getInstanceName()).isNull();
     assertThat(criteria.getDigestPrefix()).isNull();
@@ -21,7 +21,7 @@ public class FlushCriteriaTest {
   @Test
   public void testConstructorWithInstanceScope() {
     FlushCriteria criteria = new FlushCriteria(FlushScope.INSTANCE, "test-instance", null);
-    
+
     assertThat(criteria.getScope()).isEqualTo(FlushScope.INSTANCE);
     assertThat(criteria.getInstanceName()).isEqualTo("test-instance");
     assertThat(criteria.getDigestPrefix()).isNull();
@@ -30,7 +30,7 @@ public class FlushCriteriaTest {
   @Test
   public void testConstructorWithDigestPrefixScope() {
     FlushCriteria criteria = new FlushCriteria(FlushScope.DIGEST_PREFIX, null, "abc123");
-    
+
     assertThat(criteria.getScope()).isEqualTo(FlushScope.DIGEST_PREFIX);
     assertThat(criteria.getInstanceName()).isNull();
     assertThat(criteria.getDigestPrefix()).isEqualTo("abc123");

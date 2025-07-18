@@ -1,8 +1,6 @@
 package build.buildfarm.admin.cache.model;
 
-/**
- * Request to flush Content Addressable Storage entries.
- */
+/** Request to flush Content Addressable Storage entries. */
 public class CASFlushRequest {
   private FlushScope scope;
   private String instanceName;
@@ -113,7 +111,8 @@ public class CASFlushRequest {
   /**
    * Sets whether to flush Redis-backed CAS worker map entries.
    *
-   * @param flushRedisWorkerMap true if Redis-backed CAS worker map entries should be flushed, false otherwise
+   * @param flushRedisWorkerMap true if Redis-backed CAS worker map entries should be flushed, false
+   *     otherwise
    */
   public void setFlushRedisWorkerMap(boolean flushRedisWorkerMap) {
     this.flushRedisWorkerMap = flushRedisWorkerMap;

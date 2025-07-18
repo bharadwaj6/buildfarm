@@ -18,14 +18,14 @@ public class AdapterConfigTest {
     assertEquals(0, config.getProperties().size());
     assertEquals("Adapter type must be specified", config.validate());
   }
-  
+
   @Test
   public void testSetters() {
     AdapterConfig config = new AdapterConfig();
-    
+
     config.setType(AdapterType.REDIS);
     assertEquals(AdapterType.REDIS, config.getType());
-    
+
     Map<String, String> properties = new HashMap<>();
     properties.put("host", "localhost");
     properties.put("port", "6379");
@@ -34,49 +34,49 @@ public class AdapterConfigTest {
     assertEquals("localhost", config.getProperties().get("host"));
     assertEquals("6379", config.getProperties().get("port"));
   }
-  
+
   @Test
   public void testValidateRedisAdapter() {
     AdapterConfig config = new AdapterConfig();
     config.setType(AdapterType.REDIS);
-    
+
     // Missing host and port
     assertEquals("Redis adapter requires 'host' property", config.validate());
-    
+
     // Missing port
     Map<String, String> properties = new HashMap<>();
     properties.put("host", "localhost");
     config.setProperties(properties);
     assertEquals("Redis adapter requires 'port' property", config.validate());
-    
+
     // Invalid port
     properties.put("port", "invalid");
     config.setProperties(properties);
     assertEquals("Redis adapter 'port' property must be a valid integer", config.validate());
-    
+
     // Valid configuration
     properties.put("port", "6379");
     config.setProperties(properties);
     assertNull(config.validate());
   }
-  
+
   @Test
   public void testValidateInMemoryAdapter() {
     AdapterConfig config = new AdapterConfig();
     config.setType(AdapterType.IN_MEMORY);
-    
+
     // In-memory adapter doesn't require any properties
     assertNull(config.validate());
   }
-  
+
   @Test
   public void testValidateFileSystemAdapter() {
     AdapterConfig config = new AdapterConfig();
     config.setType(AdapterType.FILE_SYSTEM);
-    
+
     // Missing path
     assertEquals("File system adapter requires 'path' property", config.validate());
-    
+
     // Valid configuration
     Map<String, String> properties = new HashMap<>();
     properties.put("path", "/tmp/cache");

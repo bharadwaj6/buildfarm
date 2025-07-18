@@ -9,15 +9,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Tests for {@link CASAdapter}.
- */
+/** Tests for {@link CASAdapter}. */
 @RunWith(JUnit4.class)
 public class CASAdapterTest {
 
-  /**
-   * Test implementation of CASAdapter for testing the contract.
-   */
+  /** Test implementation of CASAdapter for testing the contract. */
   private static class TestCASAdapter implements CASAdapter {
     private boolean flushAllCalled = false;
     private boolean flushInstanceCalled = false;
@@ -49,9 +45,9 @@ public class CASAdapterTest {
   public void testFlushAll() {
     TestCASAdapter adapter = new TestCASAdapter();
     FlushCriteria criteria = new FlushCriteria(FlushScope.ALL, null, null);
-    
+
     FlushResult result = adapter.flushEntries(criteria);
-    
+
     assertThat(adapter.flushAllCalled).isTrue();
     assertThat(result.isSuccess()).isTrue();
     assertThat(result.getMessage()).isEqualTo("All CAS entries flushed");
@@ -63,9 +59,9 @@ public class CASAdapterTest {
   public void testFlushInstance() {
     TestCASAdapter adapter = new TestCASAdapter();
     FlushCriteria criteria = new FlushCriteria(FlushScope.INSTANCE, "test-instance", null);
-    
+
     FlushResult result = adapter.flushEntries(criteria);
-    
+
     assertThat(adapter.flushInstanceCalled).isTrue();
     assertThat(adapter.lastInstanceName).isEqualTo("test-instance");
     assertThat(result.isSuccess()).isTrue();
@@ -78,9 +74,9 @@ public class CASAdapterTest {
   public void testFlushDigestPrefix() {
     TestCASAdapter adapter = new TestCASAdapter();
     FlushCriteria criteria = new FlushCriteria(FlushScope.DIGEST_PREFIX, null, "abc123");
-    
+
     FlushResult result = adapter.flushEntries(criteria);
-    
+
     assertThat(adapter.flushDigestPrefixCalled).isTrue();
     assertThat(adapter.lastDigestPrefix).isEqualTo("abc123");
     assertThat(result.isSuccess()).isTrue();

@@ -1,8 +1,6 @@
 package build.buildfarm.admin.cache.model;
 
-/**
- * Response when a rate limit is exceeded.
- */
+/** Response when a rate limit is exceeded. */
 public class RateLimitExceededResponse {
   private final String errorCode = "RATE_LIMIT_EXCEEDED";
   private final String message;
@@ -10,7 +8,7 @@ public class RateLimitExceededResponse {
   private final int maxOperationsAllowed;
   private final long windowSizeMs;
   private final long timeRemainingMs;
-  
+
   /**
    * Creates a new RateLimitExceededResponse.
    *
@@ -32,7 +30,7 @@ public class RateLimitExceededResponse {
     this.windowSizeMs = windowSizeMs;
     this.timeRemainingMs = timeRemainingMs;
   }
-  
+
   /**
    * Gets the error code.
    *
@@ -41,7 +39,7 @@ public class RateLimitExceededResponse {
   public String getErrorCode() {
     return errorCode;
   }
-  
+
   /**
    * Gets the error message.
    *
@@ -50,7 +48,7 @@ public class RateLimitExceededResponse {
   public String getMessage() {
     return message;
   }
-  
+
   /**
    * Gets the number of operations performed in the current window.
    *
@@ -59,7 +57,7 @@ public class RateLimitExceededResponse {
   public int getOperationsPerformed() {
     return operationsPerformed;
   }
-  
+
   /**
    * Gets the maximum number of operations allowed per window.
    *
@@ -68,7 +66,7 @@ public class RateLimitExceededResponse {
   public int getMaxOperationsAllowed() {
     return maxOperationsAllowed;
   }
-  
+
   /**
    * Gets the size of the time window in milliseconds.
    *
@@ -77,7 +75,7 @@ public class RateLimitExceededResponse {
   public long getWindowSizeMs() {
     return windowSizeMs;
   }
-  
+
   /**
    * Gets the time remaining in the current window in milliseconds.
    *

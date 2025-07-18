@@ -1,20 +1,18 @@
 package build.buildfarm.admin.auth;
 
-import javax.inject.Singleton;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
+import javax.inject.Singleton;
 
-/**
- * Guice module for authentication and authorization.
- */
+/** Guice module for authentication and authorization. */
 public class AuthModule extends AbstractModule {
-  
+
   @Override
   protected void configure() {
     bind(AdminAuthFilter.class);
     bind(AdminRoleFilter.class);
   }
-  
+
   @Provides
   @Singleton
   public AuthConfig provideAuthConfig() {
