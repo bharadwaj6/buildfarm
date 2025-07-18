@@ -1,0 +1,42 @@
+groups:
+- name: cache-flush-alerts
+  rules:
+  # Alert for high number of failed flush operations
+  - alert: HighFailedFlushOperations
+    expr: sum(increase(cache_flush_operations_total{success="false"}[1h])) > 5
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High number of failed cache flush operations"
+      description: "There have been more than 5 failed cache flush operations in the last hour."
+      
+  # Alert for excessive cache flush operations
+  - alert: ExcessiveCacheFlushOperations
+    expr: sum(increase(cache_flush_operations_total[1h])) > 20
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Excessive cache flush operations"
+      description: "There have been more than 20 cache flush operations in the last hour, which is higher than normal."
+      
+  # Alert for large amount of space reclaimed
+  - alert: LargeSpaceReclamation
+    expr: sum(increase(cache_flush_bytes_reclaimed_total[1h])) > 10737418240  # 10GB
+    for: 5m
+    labels:
+      severity: info
+    annotations:
+      summary: "Large amount of space reclaimed"
+      description: "More than 10GB of space has been reclaimed in the last hour."
+      
+  # Alert for high number of entries removed
+  - alert: HighEntriesRemoved
+    expr: sum(increase(cache_flush_entries_removed_total[1h])) > 10000
+    for: 5m
+    labels:
+      severity: info
+    annotations:
+      summary: "High number of entries removed"
+      description: "More than 10,000 cache entries have been removed in the last hour."

@@ -1,0 +1,103 @@
+.metrics-dashboard {
+  margin: 20px 0;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.metrics-dashboard h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.metrics-section {
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #fff;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.metrics-section h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #444;
+  font-size: 18px;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.metric-card {
+  padding: 15px;
+  background-color: #f0f4f8;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.metric-value {
+  font-size: 24px;
+  font-weight: bold;
+  color: #0066cc;
+  margin: 10px 0;
+}
+
+.metric-label {
+  font-size: 14px;
+  color: #666;
+}
+
+.metrics-actions {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.refresh-button {
+  padding: 8px 16px;
+  background-color: #0066cc;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.refresh-button:hover {
+  background-color: #0055aa;
+}
+
+.metrics-error {
+  padding: 15px;
+  background-color: #fff3f3;
+  border-left: 4px solid #ff3333;
+  margin-bottom: 20px;
+  display: none;
+}
+
+/* Success and failure colors */
+.success-metric .metric-value {
+  color: #28a745;
+}
+
+.failure-metric .metric-value {
+  color: #dc3545;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+}

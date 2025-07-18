@@ -4,6 +4,7 @@ import build.buildfarm.admin.cache.adapter.ac.ActionCacheAdapter;
 import build.buildfarm.admin.cache.adapter.cas.CASAdapter;
 import build.buildfarm.admin.cache.concurrency.ConcurrencyConfig;
 import build.buildfarm.admin.cache.concurrency.ConcurrencyControlService;
+import build.buildfarm.admin.cache.metrics.CacheFlushMetrics;
 import build.buildfarm.admin.cache.model.ActionCacheFlushRequest;
 import build.buildfarm.admin.cache.model.ActionCacheFlushResponse;
 import build.buildfarm.admin.cache.model.CASFlushRequest;
@@ -11,6 +12,7 @@ import build.buildfarm.admin.cache.model.CASFlushResponse;
 import build.buildfarm.admin.cache.model.ConcurrencyLimitExceededResponse;
 import build.buildfarm.admin.cache.model.FlushCriteria;
 import build.buildfarm.admin.cache.model.FlushResult;
+import build.buildfarm.admin.cache.model.FlushScope;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
@@ -284,9 +286,19 @@ public class CacheFlushServiceImpl implements CacheFlushService {
       logger.info(String.format(
           "Flushed %d entries from Action Cache backend: %s", 
           result.getEntriesRemoved(), backendName));
+      
+      // Record metrics for the flush operation
+      CacheFlushMetrics.recordFlushOperation(
+          "action-cache", backendName, criteria.getScope().name(), result.isSuccess());
+      CacheFlushMetrics.recordEntriesRemoved(
+          "action-cache", backendName, result.getEntriesRemoved());
+      
       return result;
     } catch (Exception e) {
       logger.log(Level.SEVERE, "Error flushing Action Cache backend: " + backendName, e);
+      // Record failed operation in metrics
+      CacheFlushMetrics.recordFlushOperation(
+          "action-cache", backendName, criteria.getScope().name(), false);
       return new FlushResult(
           false, "Error flushing Action Cache backend: " + backendName + ": " + e.getMessage(), 0, 0);
     }
@@ -311,9 +323,21 @@ public class CacheFlushServiceImpl implements CacheFlushService {
       logger.info(String.format(
           "Flushed %d entries (%d bytes) from CAS backend: %s", 
           result.getEntriesRemoved(), result.getBytesReclaimed(), backendName));
+      
+      // Record metrics for the flush operation
+      CacheFlushMetrics.recordFlushOperation(
+          "cas", backendName, criteria.getScope().name(), result.isSuccess());
+      CacheFlushMetrics.recordEntriesRemoved(
+          "cas", backendName, result.getEntriesRemoved());
+      CacheFlushMetrics.recordBytesReclaimed(
+          "cas", backendName, result.getBytesReclaimed());
+      
       return result;
     } catch (Exception e) {
       logger.log(Level.SEVERE, "Error flushing CAS backend: " + backendName, e);
+      // Record failed operation in metrics
+      CacheFlushMetrics.recordFlushOperation(
+          "cas", backendName, criteria.getScope().name(), false);
       return new FlushResult(
           false, "Error flushing CAS backend: " + backendName + ": " + e.getMessage(), 0, 0);
     }

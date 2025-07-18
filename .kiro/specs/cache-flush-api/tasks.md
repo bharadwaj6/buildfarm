@@ -159,7 +159,7 @@
     - Test edge cases and error conditions
     - _Requirements: 6.1_
 
-  - [-] 12.2 Implement integration tests
+  - [x] 12.2 Implement integration tests
     - Create end-to-end tests for flush operations
     - Test interactions between components
     - _Requirements: 6.2_
@@ -179,15 +179,15 @@
     - Check all storage layers
     - _Requirements: 6.5_
 
-- [ ] 13. Implement monitoring and metrics
-  - [ ] 13.1 Add metrics for flush operations
+- [x] 13. Implement monitoring and metrics
+  - [x] 13.1 Add metrics for flush operations
     - Track number of flush operations
     - Track number of entries removed
     - Track amount of space reclaimed
     - Write unit tests for metrics collection
     - _Requirements: 1.4, 2.5_
 
-  - [ ] 13.2 Create monitoring dashboards
+  - [x] 13.2 Create monitoring dashboards
     - Implement dashboards for flush operation metrics
     - Add alerts for abnormal flush patterns
     - _Requirements: 1.4, 2.5_

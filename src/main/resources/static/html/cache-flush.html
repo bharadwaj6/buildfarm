@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BuildFarm Cache Flush</title>
     <link rel="stylesheet" href="../css/cache-flush.css">
+    <link rel="stylesheet" href="../css/cache-flush-metrics.css">
 </head>
 <body>
     <div class="container">
@@ -13,6 +14,7 @@
         <div class="tabs">
             <button class="tab-button active" data-tab="action-cache">Action Cache</button>
             <button class="tab-button" data-tab="cas">Content Addressable Storage</button>
+            <button class="tab-button" data-tab="metrics">Metrics</button>
         </div>
         
         <div class="tab-content active" id="action-cache-tab">
@@ -112,8 +114,63 @@
                 <div class="result-content"></div>
             </div>
         </div>
+        
+        <div class="tab-content" id="metrics-tab">
+            <h2>Cache Flush Metrics</h2>
+            
+            <div id="metrics-error" class="metrics-error">
+                <p>Failed to load metrics data. Please try refreshing.</p>
+            </div>
+            
+            <div id="metrics-container" class="metrics-dashboard">
+                <div class="metrics-section">
+                    <h3>Action Cache Metrics</h3>
+                    <div class="metrics-grid">
+                        <div class="metric-card success-metric">
+                            <div class="metric-label">Successful Operations</div>
+                            <div id="ac-operations-success" class="metric-value">0</div>
+                        </div>
+                        <div class="metric-card failure-metric">
+                            <div class="metric-label">Failed Operations</div>
+                            <div id="ac-operations-failure" class="metric-value">0</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">Entries Removed</div>
+                            <div id="ac-entries-removed" class="metric-value">0</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="metrics-section">
+                    <h3>Content Addressable Storage Metrics</h3>
+                    <div class="metrics-grid">
+                        <div class="metric-card success-metric">
+                            <div class="metric-label">Successful Operations</div>
+                            <div id="cas-operations-success" class="metric-value">0</div>
+                        </div>
+                        <div class="metric-card failure-metric">
+                            <div class="metric-label">Failed Operations</div>
+                            <div id="cas-operations-failure" class="metric-value">0</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">Entries Removed</div>
+                            <div id="cas-entries-removed" class="metric-value">0</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">Space Reclaimed</div>
+                            <div id="cas-bytes-reclaimed" class="metric-value">0 Bytes</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="metrics-actions">
+                    <button id="refresh-metrics" class="refresh-button">Refresh Metrics</button>
+                </div>
+            </div>
+        </div>
     </div>
     
     <script src="../js/cache-flush.js"></script>
+    <script src="../js/cache-flush-metrics.js"></script>
 </body>
 </html>
