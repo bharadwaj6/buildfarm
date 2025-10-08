@@ -166,8 +166,9 @@ maven.install(
     repositories = [
         "https://repo.maven.apache.org/maven2",
     ],
-    resolver = "maven",
+    resolver = "coursier",
     strict_visibility = True,
+    use_credentials_from_home_netrc_file = True,
 )
 
 # Test only maven dependencies
